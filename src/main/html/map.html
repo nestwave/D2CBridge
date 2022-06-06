@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Nestwave Device Tracking Map</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<meta charset="utf-8">
+		<link rel='icon' type="image/jpg"  href="/favicon.jpg"/>
+		<style>
+			html, body, #map {
+				margin: 0;
+				padding: 0;
+				height: 100%;
+			}
+			label {
+				font: "Courier";
+				font-size: 12px;
+			}
+		</style>
+		</head>
+	<body>
+		<div style='position:absolute;z-index:2;border:1px outset blue;right:50px;top:50px;opacity:75%;background-color:lightgray;'>
+			<table style='cursor:not-allowed;'>
+				<tbody>
+					<tr>
+						<td><label for='mapCenter'>Lon, Lat:</label></td>
+						<td><input type='text' min=-90 max=90 value='2.3469252,48.8616948' id='mapCenter' maxlength=13 size=10 onchange='setMapCenter();'></td>
+					</tr>
+						<td><label for='lon'>Nb Points:</label></td>
+						<td><input type='text' min=0 value='Infinity' id='nbVisiblePoints' maxlength=13 size=5>/<input type='text' min=0 value='0' id='nbPoints' maxlength=13 size=3 disabled></td>
+					</tr>
+					</tr>
+						<td><label for='deviceId'>Device ID:</label></td>
+						<td><input type='text' value='0.0.0.0.0' id='deviceId' maxlength=13 size=10 onchange='setDeviceId();'></td>
+					</tr>
+				</tbody>
+				</tbody>
+			</table>
+		</div>
+		<div id="map"></div>
+		<script src='javascript/gmaps.js'></script>
+		<script async defer src="https://maps.googleapis.com/maps/api/js?&callback=initialize&key=AIzaSyB-rheutoPkPj1A__Emi00hfOnDkQj1Vzc" id=initScript></script>
+	</body>
+</html>

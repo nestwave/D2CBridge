@@ -1,0 +1,114 @@
+###############################################################################
+# Copyright 2022 - NESTWAVE SAS
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+# USE OR OTHER DEALINGS IN THE SOFTWARE.
+###############################################################################
+##### Spring Boot Configuration #####
+config:
+  directory: /opt/Nestwave/security
+
+server:
+  port: 8088
+  compression:
+    enabled: true
+  ssl:
+    key-store-type: PKCS12
+    key-store: ${config.directory}/keystore.p12
+    key-store-password: ${KEY_STORE_PASSWORD}
+    enabled: true
+  http:
+    port: 8087
+
+background:
+  base_url: http://background:8086/
+
+navigation:
+  base_url: https://navigation:8443/
+
+logging:
+  level:
+    org.springframework: ERROR
+    com.nestwave: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"
+    file: "%d %p %c{1.} [%t] %m%n"
+  file: app-device.log
+
+spring:
+  jpa:
+    database: POSTGRESQL
+    database-platform: org.hibernate.dialect.PostgreSQL95Dialect
+    generate-ddl: false
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate.default_schema: public
+      hibernate.jdbc.lob.non_contextual_creation: true # not available in postgres
+      hibernate.jdbc.timezone: UTC
+      # batch inserts and updates
+      hibernate.jdbc.batch_size: 100
+      hibernate.jdbc.batch_versioned_data: true
+      hibernate.order_inserts: true
+      hibernate.order_updates: true
+      # debug
+      hibernate.show_sql: false
+      hibernate.format_sql: false
+  datasource:
+    url: jdbc:postgresql://tracking:5432/tracking
+    username: ${JDBC_USERNAME}
+    password: ${JDBC_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      # default values for the moment
+      connectionTimeout: 30000
+      idle-timeout: 600000
+      maxLifetime: 1800000
+      minimumIdle: 10
+      maximumPoolSize: 10
+  liquibase:
+    enabled: true
+    default-schema: public
+    change-log: classpath:database/tracking/changelog.xml
+    database-change-log-table: database_changelog
+    database-change-log-lock-table: database_changelog_lock
+  profiles:
+    active: ${LOG_PROFILE:prod}
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: broker:9092
+      bindings:
+        assistance-in:
+          destination: assistance
+          contentType: application/json
+
+jwt:
+  file: ${config.directory}/secret.jwt
+  period: 9 # Allow two extra trials, in case of update failure, before JWT expires.
+  url: https://authentication:9443/authenticate/renew
+
+partners:
+  traxmate:
+    url: https://online.traxmate.io:3000
+    customerIdList: 0x0 # Class-A addresses used by Nestwave test devices
+    token: ${TRAXMATE_TOKEN:} # Service will be disabled if no token is passed
+    api:
+      submitPosition: /capture/service/${partners.traxmate.token}/device/@{deviceId}
