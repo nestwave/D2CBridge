@@ -76,25 +76,25 @@ sg docker
 
 ## Fetching sources
 One needs to execute a few steps to get a working local copy.
-### Create destination direcotry
-We will install the D2CB source in `/opt/Nestwave/D2CBRidge` but one can use any location.
+### Create destination directory
+We will install the D2CB source in `/opt/Nestwave/dev/D2CBridge` but one can use any location.
 
 ```
-mkdir -p /opt/Nestwave/D2CBridge/cloud
+mkdir -p /opt/Nestwave/dev/D2CBridge/cloud
 ```
 
 ### Clone tools
-The DC2B code requires and extra repository for tools.
+The DC2B code requires and extra repository for tools. This repository is provided by Nestwave as a compressed tarball. Please visit [this page](https://github.com/nestwave/D2CBridge/releases) and download it from the asset section of the latest tools version. Then perform the following command.
 ```
-cd /opt/Nestwave/D2CBridge
-git clone git@github.com:nestwave/tools
+TOOLS_VERSION=v1.6-8
+# You already downloaded tools-${TOOLS_VERSION}.tar.xz using your browser.
+tar -C /opt/Nestwave/dev/D2CBridge -vaxf ~/Downloads/tools-${TOOLS_VERSION}.tar.xz
 ```
 
-#### Clone S2CB sources
+#### Clone D2CB sources
 Just execute the following command and you are ready to build your device to Nestwave cloud bridge.
 ```
-cd /opt/Nestwave/D2CBridge/cloud
-git clone git@github.com:nestwave/cloudDevice device
+git -C /opt/Nestwave/dev/D2CBridge/cloud clone git@github.com:nestwave/D2CBridge device
 ```
 
 ## Compilation
@@ -130,7 +130,7 @@ openssl pkcs12 -export \
 ```
 
 For compilation, just use `make` or `make clean all`.
-The process will prompt for your Nestwave username and password. If you don't have one, please go to https://cloud.nestwave.com/ to create your account. 
+If no NestCloud user login and password were set in `security/sensitive-config.ini`, then the process will prompt for your Nestwave username and password. If you don't have one, please go to https://cloud.nestwave.com/ to create your account.
 
 In order to make the process fully automatic one can use `make NSW_USERNAME='username@company.com' NSW_PASSWORD='password'`.
 
@@ -185,13 +185,15 @@ docker-compose -f docker-compose-bridge.yml up -d --build
 ```
 
 ## Technical documentation
+Please ensure you have read [NestCloud Bridge Specification V1.03](doc/NestCloud%20Bridge%20Specification%20v1.03.pdf) before you start working on D2CB.
+
 ### Positions tracking database
 The D2CB allows storing device positions in a DB in order provide them to a web frontend (an Apache based example is provided [here](src/main/html)).
 
 The  DB that is located on a separate server. In this case the code should be reworked to use asynchronous operations.
 
 #### Tables layout
-The positions tracking DB is named `positions` and holds a set of columns that are defined [here)(src/main/java/com/nestwave/device/repository/position/PositionRecord.java).
+The positions tracking DB is named `positions` and holds a set of columns that are defined [here](src/main/java/com/nestwave/device/repository/position/PositionRecord.java).
 
 The `key.id` corresponds to device unique identifier that is referenced in this document by _device ID_. The device ID allows identifying different devices, but needs a provisioning step upon production.
 

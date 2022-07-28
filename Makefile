@@ -11,6 +11,8 @@ ROOT_DIR:=$(patsubst %/,%,$(dir $(patsubst %/,%,$(dir ${DIR}))))
 endif
 DEVICE_DIR:=${DIR}
 
+include ${DIR}/security/sensitive-config.ini
+
 device_all:${DIR}
 
 ${DIR}:$(addprefix ${DIR}/target/security/,secret.jwt sensitive-config.ini)
