@@ -114,19 +114,28 @@ cd `dirname $0`
 
 HOSTNAME=${1:-`hostname -f`}
 SERVICES="authentication navigation"
+# Certificate remote path below is Nestwave one.
+# Customers should change it to thier specific path.
+# If using LetsEncrypt, just replace nw.do by your domain name.
 CERT_REMOTE_PATH=/etc/letsencrypt/live/nw.do
 CERT_LOCAL_PATH=${PWD}/security
+# Get keystore pasword from sensitive-config.ini.
+KEY_STORE_PASSWORD=`sed -ne 's/KEY_STORE_PASSWORD=\(.*\)$/\1/p' security/sensitive-config.ini`
 
 test -d ${CERT_LOCAL_PATH} ||  mkdir ${CERT_LOCAL_PATH}
 chmod 700 ${CERT_LOCAL_PATH}
 
 scp root@${HOSTNAME}:${CERT_REMOTE_PATH}/*.pem ${CERT_LOCAL_PATH}
 
+# Run openssl to create the key store.
+# You may get the error: "sh: 2: KEY_STORE_PASSWORD: parameter not set or null"
+# This means that sed expression above failed ot get KEY_STORE_PASSWORD value.
+# Then, hard code it above by copying it from security/sensitive-config.ini.
 openssl pkcs12 -export \
 	-in ${CERT_LOCAL_PATH}/fullchain.pem \
 	-inkey ${CERT_LOCAL_PATH}/privkey.pem \
 	-out ${CERT_LOCAL_PATH}/keystore.p12 -name tomcat -CAfile chain.pem \
-	-caname root -passout pass:nestwave
+	-caname root -passout "pass:${KEY_STORE_PASSWORD:?}"
 ```
 
 For compilation, just use `make` or `make clean all`.
