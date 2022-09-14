@@ -194,7 +194,9 @@ docker-compose -f docker-compose-bridge.yml up -d --build
 ```
 
 ## Technical documentation
-Please ensure you have read [NestCloud Bridge Specification V1.03](doc/NestCloud%20Bridge%20Specification%20v1.03.pdf) before you start working on D2CB.
+Before you start working on D2CB, please ensure you have read
+- [NestCloud Bridge Specification V1.04](doc/NestCloud%20Bridge%20Specification%20v1.04.pdf) for API verzsion v1.7 and later.
+- [NestCloud Bridge Specification V1.03](doc/NestCloud%20Bridge%20Specification%20v1.03.pdf) for API verzsion v1.6 and prior. (This is legacy and shall not be used for new projects).
 
 ### Positions tracking database
 The D2CB allows storing device positions in a DB in order provide them to a web frontend (an Apache based example is provided [here](src/main/html)).
@@ -214,10 +216,12 @@ Please read [security/README.md](security/README.md) for more information about 
 ### Device ID
 D2CB uses a data packet that holds a device unique identifier and a Fletcher 32 integrity check word.
 
-The device identifier is the first 32 bits of the received data packet.
-The device ID is handled as a variable length prefix and an enumeration part. This is one exemple of how to manage the device IDs.
-![Message structure and identifier](https://user-images.githubusercontent.com/84769396/173068497-05844000-8379-4272-be1e-62f38e0a8cca.png)
-
+The device identifier is the first bytes of the received data packet:
+- 64 bits for v1.7 and later versions,
+  - bits[47 downto 0]: IMEI
+  - bist[63 downto 48]: Custom device ID that can be set during manufacturing.
+- 32 bits for v1.6 and prior versions. This is a legacy format and shall not be
+  used anymore.
 
 ### Adding a plugin
 An example of plugins exists in [`src/main/java/com/traxmate`](src/main/java/com/traxmate).

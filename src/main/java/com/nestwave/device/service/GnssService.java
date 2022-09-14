@@ -20,8 +20,9 @@ package com.nestwave.device.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nestwave.model.Payload;
 import com.nestwave.device.util.JwtTokenUtil;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,9 +32,10 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.nio.charset.Charset;
 
-import static java.lang.Integer.toUnsignedLong;
 import static org.apache.tomcat.util.codec.binary.Base64.encodeBase64String;
 
 @Slf4j
@@ -59,20 +61,17 @@ public abstract class GnssService {
         return ResponseEntity.status(httpStatus).body(msg);
     }
     
-    public <T> ResponseEntity<T> remoteApi(String apiVer, String api, byte[] payloadContent, String clientIpAddr, Class<T> responseType){
+    public <T> ResponseEntity<T> remoteApi(String apiVer, String api, GnssServiceParameters payload, String clientIpAddr, Class<T> responseType){
 		ResponseEntity<T> responseEntity;
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", jwtTokenUtil.getSecret());
-        HttpEntity<byte[]> requestEntity = new HttpEntity<>(payloadContent, headers);
-        Payload payload;
+        HttpEntity<?> requestEntity = new HttpEntity<>(payload, headers);
         String uri;
         String strResponse;
 
         log.info("Request from IP: {}, API: /{}/{}}", clientIpAddr, apiVer, api);
-        payload = new Payload(payloadContent);
-        log.info("deviceId = {},  chkWord = {}, assistanceParams = \"{}\"", toUnsignedLong(payload.deviceId), toUnsignedLong(payload.chkWord), encodeBase64String(payload.content));
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(uriBase + apiVer + "/" + api)
-                .queryParam("payload", payload);
+        log.info("deviceId = {}, payload = \"{}\"", payload.deviceId, payload);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(uriBase + apiVer + "/" + api);
         restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(Charset.forName("UTF-8")));
         uri = builder.toUriString();
         log.info("Request forwarded to: {}", uri);
@@ -91,10 +90,12 @@ public abstract class GnssService {
         log.info("Received answer: status: {}, payload: {}", responseEntity.getStatusCode(), strResponse);
         return responseEntity;
     }
+}
 
-	public GnssServiceResponse remoteApi(String apiVer, String api, byte[] payloadContent, String clientIpAddr){
-		ResponseEntity<byte[]> responseEntity = remoteApi(apiVer, api, payloadContent, clientIpAddr, byte[].class);
-
-		return new GnssServiceResponse(responseEntity.getStatusCode(), responseEntity.getBody());
-	}
+@Data
+class GnssServiceParameters{
+    @NotNull
+    @Size(groups = String.class, min = 1, max = 32)
+    @Schema(description = "Device ID", required = false)
+    public String deviceId;
 }

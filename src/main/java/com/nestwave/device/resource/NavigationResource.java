@@ -66,7 +66,7 @@ public class NavigationResource extends EndPoint{
 	}
 
 	@GetMapping(value = {"gnssDevicePositionsGet"}, produces = MediaType.TEXT_PLAIN_VALUE)
-	public ResponseEntity<Object> gnssDevicePositionsGet(@PathVariable String apiVer, Integer deviceId, HttpServletRequest request){
+	public ResponseEntity<Object> gnssDevicePositionsGet(@PathVariable String apiVer, long deviceId, HttpServletRequest request){
 		GnssServiceResponse response;
 
 		response = gnssPositionsGet(apiVer, deviceId, getClientIpAddr(request), false);
@@ -74,7 +74,7 @@ public class NavigationResource extends EndPoint{
 	}
 
 	@GetMapping(value = {"gnssDevicePositionsDelete"}, produces = MediaType.TEXT_PLAIN_VALUE)
-	public ResponseEntity<Object> gnssDevicePositionsDelete(@PathVariable String apiVer, Integer deviceId, HttpServletRequest request){
+	public ResponseEntity<Object> gnssDevicePositionsDelete(@PathVariable String apiVer, Long deviceId, HttpServletRequest request){
 		GnssServiceResponse response;
 
 		response = gnssPositionsGet(apiVer, deviceId, getClientIpAddr(request), true);

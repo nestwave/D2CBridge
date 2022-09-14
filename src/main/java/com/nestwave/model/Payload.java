@@ -30,7 +30,7 @@ import static java.util.Arrays.copyOfRange;
 
 @Slf4j
 public class Payload{
-	public final int deviceId;
+	public final long deviceId;
 	public final byte[] content;
 	public final int chkWord;
 	public final boolean isValid;
@@ -41,13 +41,21 @@ public class Payload{
 
 	public Payload(byte[] payload)
 	{
-		int assistLen = payload.length - 8;
-		int chkWordComputed;
+		this(payload, 8);
+	}
 
-		deviceId = wrap(copyOfRange(payload, 0, 4)).order(LITTLE_ENDIAN).getInt();
-		this.content = copyOfRange(payload, 4, assistLen + 4);
-		chkWord = wrap(copyOfRange(payload, assistLen + 4,  assistLen + 8)).order(LITTLE_ENDIAN).getInt();
-		chkWordComputed = fletcher32(payload, assistLen + 4);
+	public Payload(byte[] payload, int deviceIdLen)
+	{
+		int fletcher32DataLength = payload.length - 4;
+		int chkWordComputed;
+		if(deviceIdLen == 8) {
+			deviceId = wrap(copyOfRange(payload, 0, deviceIdLen)).order(LITTLE_ENDIAN).getLong();
+		} else{
+			deviceId = wrap(copyOfRange(payload, 0, deviceIdLen)).order(LITTLE_ENDIAN).getInt();
+		}
+		this.content = copyOfRange(payload, deviceIdLen, fletcher32DataLength);
+		chkWord = wrap(copyOfRange(payload, fletcher32DataLength, payload.length)).order(LITTLE_ENDIAN).getInt();
+		chkWordComputed = fletcher32(payload, fletcher32DataLength);
 		isValid = chkWord == chkWordComputed;
 		if(!isValid){
 			log.error("Integrity check failed: expected: {}, computed: {}, payload.length: {}", toUnsignedLong(chkWord), toUnsignedLong(chkWordComputed), payload.length);
@@ -56,8 +64,6 @@ public class Payload{
 
 	public Payload(int deviceId, byte[] payload, int chkWord)
 	{
-		int assistLen = payload.length - 8;
-
 		this.deviceId = deviceId;
 		this.content = payload;
 		this.chkWord = chkWord;
@@ -88,6 +94,11 @@ public class Payload{
 			wQty -= 360;
 		}
 		return c1 << 16 | c0;
+	}
+
+	public int customerId()
+	{
+		return isLegacy() ? customerId((int)deviceId) : (int)((deviceId >> 48) & 0xFFFFL);
 	}
 
 	public static int customerId(int deviceId){
@@ -143,5 +154,10 @@ public class Payload{
 			log.error("Invalid device ID: {}", devId);
 		}
 		return deviceId;
+	}
+
+	public boolean isLegacy()
+	{
+		return deviceId >> 32 == 0;
 	}
 }

@@ -27,8 +27,8 @@ import java.util.Optional;
 
 @Repository
 @Transactional
-public interface PositionJpaRepository extends JpaRepository<PositionRecord, Integer>{
+public interface PositionJpaRepository extends JpaRepository<PositionRecord, Long>{
 	Optional<PositionRecord> findByKey(CompositeKey key);
-	List<PositionRecord> findAllByKeyIdOrderByKeyUtcTimeAsc(int id);
-	void deleteByKeyId(int id);
+	List<PositionRecord> findAllByKeyIdOrderByKeyUtcTimeAsc(long id);
+	void deleteByKeyId(long id);
 }

@@ -91,14 +91,18 @@ public class EndPoint{
 
 		//request from IP: 178.208.16.92, getAssistance by date : 2018-06-02T18:00:25 (GPS Time: 1211997625)
 		log.info("Request from IP: {}, API: /{}/gnssPosition", clientIpAddr, apiVer);
-		payload = new Payload(rawResults);
+		if(apiVer.compareTo("v1.7") < 0){
+			payload = new Payload(rawResults, 4);
+		}else{
+			payload = new Payload(rawResults);
+		}
 		strPayload = encodeBase64String(payload.content);
 		log.info("deviceId = {}, chkWord = {}, rawResults = \"{}\"", payload.deviceId, payload.chkWord, strPayload);
 		response = navigationService.gnssPosition(apiVer, rawResults, clientIpAddr, noc);
 		return response;
 	}
 
-	public GnssServiceResponse gnssPositionsGet(@NonNull String apiVer, Integer deviceId, String clientIpAddr, boolean drop){
+	public GnssServiceResponse gnssPositionsGet(@NonNull String apiVer, Long deviceId, String clientIpAddr, boolean drop){
 		GnssServiceResponse response;
 
 		log.info("Request from IP: {}, API: /{}/gnssPositionsGet?deviceId={}&drop={}", clientIpAddr, apiVer, deviceId, drop);

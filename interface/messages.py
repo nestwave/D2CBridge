@@ -98,7 +98,7 @@ def fletcher32(data):
 
 def buildMessage(deviceId, payload):
 	# First prepend the device ID
-	message = deviceId.to_bytes(4, 'little') + payload;
+	message = deviceId.to_bytes(8, 'little') + payload;
 	# Then append the fletcher32 computed on the ID + payload
 	message += fletcher32(message).to_bytes(4, 'little')
 	# Finally return the new message

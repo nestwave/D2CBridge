@@ -110,7 +110,7 @@ function setDeviceId()
 	deleteMarkers(positions);
 	nbPoints.value = 0;
 	deviceId = 0;
-	if(id.length == 5){
+	if((id.length > 0) && (id.length < 6)){
 		for(var i = 0; i < id.length; i += 1){
 			deviceId = (deviceId << (4 * (1 + (i > 1)))) +  parseInt(id[i]);
 		}

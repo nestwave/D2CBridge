@@ -45,16 +45,16 @@ public class PositionRepository{
 		return positionRecord;
 	}
 
-	public List<PositionRecord> findAllPositionRecordsById(int id)
+	public List<PositionRecord> findAllPositionRecordsById(long id)
 	{
 		return positionJpaRepository.findAllByKeyIdOrderByKeyUtcTimeAsc(id);
 	}
 
-	public void dropAllPositionRecordsWithId(int id){
+	public void dropAllPositionRecordsWithId(long id){
 		positionJpaRepository.deleteByKeyId(id);
 	}
 
-	public String getAllPositionRecordsWithId(int id){
+	public String getAllPositionRecordsWithId(long id){
 		StringBuilder csv = new StringBuilder();
 		List<PositionRecord> positions = findAllPositionRecordsById(id);
 

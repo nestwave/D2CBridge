@@ -5,4 +5,7 @@
    <changeSet id="positionsTableCreate" author="mazen">
         <sqlFile encoding="utf8" path="classpath:database/tracking/creation/positionsTableCreate.sql"/>
    </changeSet>
+   <changeSet id="positionsTableUseBigIntId" author="mazen">
+        <sqlFile encoding="utf8" path="classpath:database/tracking/creation/positionsTableUseBigIntId.sql"/>
+   </changeSet>
 </databaseChangeLog>

@@ -65,7 +65,7 @@ public class PositionRecord{
 	@Column(name = "\"Vz\"")
 	private float Vz;
 
-	public PositionRecord(int id, ZonedDateTime utcTime, float confidence, float lon, float lat, float alt, float Vx, float Vy, float Vz)
+	public PositionRecord(long id, ZonedDateTime utcTime, float confidence, float lon, float lat, float alt, float Vx, float Vy, float Vz)
 	{
 		CompositeKey key = new CompositeKey(id, utcTime);
 		this.key = key;
@@ -92,7 +92,7 @@ public class PositionRecord{
 class CompositeKey implements Serializable{
 	@NotNull
 	@Column(name = "\"ID\"")
-	private int id;
+	private long id;
 
 	@NotNull
 	@Column(name = "\"utcTime\"")

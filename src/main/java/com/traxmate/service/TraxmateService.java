@@ -36,10 +36,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.nio.charset.Charset;
 
-import static com.nestwave.model.Payload.customerId;
-import static com.nestwave.model.Payload.deviceId;
-import static java.lang.Integer.toHexString;
-import static java.lang.Integer.toUnsignedString;
+import static java.lang.Long.toUnsignedString;
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.CONTINUE;
 import static org.springframework.http.HttpStatus.NOT_IMPLEMENTED;
@@ -86,11 +83,10 @@ public class TraxmateService implements PartnerService{
 		return new GnssServiceResponse(responseEntity.getStatusCode(), responseEntity.getBody());
 	}
 
-	public GnssServiceResponse submitPosition(int deviceId, TraxmateSubmitPositionParameters data){
+	public GnssServiceResponse submitPosition(int customerId, long deviceId, TraxmateSubmitPositionParameters data){
 		final String api = environment.getProperty("partners.traxmate.api.submitPosition");
-		final int customerId = customerId(deviceId);
 
-		log.info("deviceId: {} = {} = {}, customerId: {}", toUnsignedString(deviceId), toHexString(deviceId), deviceId(deviceId), customerId);
+		log.info("deviceId: {}, customerId: {}", deviceId, customerId);
 		if(api != null){
 			for(int cId : customerIdList){
 				if(cId == customerId){
@@ -104,11 +100,11 @@ public class TraxmateService implements PartnerService{
 	}
 
 	@Override
-	public GnssServiceResponse onGnssPosition(int deviceId, GnssPositionResults gnssPositionResults){
+	public GnssServiceResponse onGnssPosition(int customerId, long deviceId, GnssPositionResults gnssPositionResults){
 		float[] position = gnssPositionResults.position;
 		float confidence = gnssPositionResults.confidence;
 		TraxmateSubmitPositionParameters data = new TraxmateSubmitPositionParameters(position, confidence, gnssPositionResults);
 
-		return submitPosition(deviceId, data);
+		return submitPosition(customerId, deviceId, data);
 	}
 }

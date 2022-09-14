@@ -26,6 +26,8 @@ import com.nestwave.device.util.JwtTokenUtil;
 import com.nestwave.model.GnssPositionResults;
 import com.nestwave.model.Payload;
 import com.nestwave.service.PartnerService;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -33,10 +35,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
 import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES;
 import static com.nestwave.device.util.GpsTime.getUtcAssistanceTime;
+import static java.lang.Long.toUnsignedString;
 import static java.util.Arrays.copyOf;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -69,6 +73,8 @@ public class NavigationService extends GnssService{
 	}
 
 	public GnssServiceResponse gnssPosition(String apiVer, byte[] rawResults, String clientIpAddr, boolean noc){
+		NavigationParameters navigationParameters = new NavigationParameters();
+		Payload payload;
 	    GnssServiceResponse response;
 	    String api;
 
@@ -77,7 +83,14 @@ public class NavigationService extends GnssService{
 	    }else{
 		    api = "gnssDevicePosition";
 	    }
-	    ResponseEntity<GnssPositionResults> responseEntity = remoteApi(apiVer, api, rawResults, clientIpAddr, GnssPositionResults.class);
+		if(apiVer.compareTo("v1.7") < 0){
+			payload = new Payload(rawResults, 4);
+		}else{
+			payload = new Payload(rawResults);
+		}
+		navigationParameters.deviceId = toUnsignedString(payload.deviceId);
+		navigationParameters.rawMeas = payload.content;
+		ResponseEntity<GnssPositionResults> responseEntity = remoteApi(apiVer, api, navigationParameters, clientIpAddr, GnssPositionResults.class);
 	    GnssPositionResults gnssPositionResults = responseEntity.getBody();
 		try{
 			response = new GnssServiceResponse(responseEntity.getStatusCode(), objectMapper.writeValueAsBytes(gnssPositionResults));
@@ -86,24 +99,25 @@ public class NavigationService extends GnssService{
 			response = new GnssServiceResponse(INTERNAL_SERVER_ERROR, "Cloud not serialize navigation results:\n" + gnssPositionResults);
 		}
 		if(response.status == HttpStatus.OK){
-		    Payload payload = new Payload(rawResults);
 		    response = savePositionIntoDatabase(apiVer, payload.deviceId, response.message);
 		    for(PartnerService service : partnerServices){
-			    GnssServiceResponse resp = service.onGnssPosition(payload.deviceId, gnssPositionResults);
+				int customerId = payload.customerId();
+				long deviceId = payload.deviceId;
+				GnssServiceResponse resp = service.onGnssPosition(customerId, deviceId, gnssPositionResults);
 				log.info("Partner's service {} returned status {} and content {}.", service.getClass().getName(), resp.status, new String(resp.message));
 		    }
 	    }
 		return response;
     }
 
-	public GnssServiceResponse dropPositionsFromDatabase(int deviceId)
+	public GnssServiceResponse dropPositionsFromDatabase(long deviceId)
 	{
 		log.info("Drop all positions for deviceId = {}", deviceId);
 		positionRepository.dropAllPositionRecordsWithId(deviceId);
 		return new GnssServiceResponse(HttpStatus.OK, (byte[])null);
 	}
 
-	public GnssServiceResponse retrievePositionsFromDatabase(int deviceId)
+	public GnssServiceResponse retrievePositionsFromDatabase(long deviceId)
 	{
 		String csv;
 
@@ -112,7 +126,7 @@ public class NavigationService extends GnssService{
 		return new GnssServiceResponse(HttpStatus.OK, csv.getBytes());
 	}
 
-	public GnssServiceResponse savePositionIntoDatabase(String apiVer, int deviceId, byte[] json){
+	public GnssServiceResponse savePositionIntoDatabase(String apiVer, long deviceId, byte[] json){
 		log.info("Decoded position:\n{}", new String(json));
 		ObjectMapper mapper = new ObjectMapper();
 		GnssPositionResults navResults;
@@ -134,4 +148,12 @@ public class NavigationService extends GnssService{
 		}
 		return new GnssServiceResponse(HttpStatus.OK, navResults.payload);
 	}
+}
+
+@Data
+class NavigationParameters extends GnssServiceParameters{
+	@NotNull
+	@Schema(description = "Assistance data as sent by the Iot device",
+			example = "AAAAAA4AAAA=", required = true)
+	public byte[] rawMeas;
 }

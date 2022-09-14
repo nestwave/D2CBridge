@@ -21,10 +21,18 @@ package com.nestwave.device.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nestwave.device.util.JwtTokenUtil;
+import com.nestwave.model.Payload;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import javax.validation.constraints.NotNull;
+
+import static java.lang.Long.toUnsignedString;
 
 @Slf4j
 @Service
@@ -39,4 +47,29 @@ public class AssistanceService extends GnssService{
 	public boolean supports(String apiVer){
 		return apiVer != null && apiVer.compareTo("v1.4") >= 0;
 	}
+
+	public GnssServiceResponse remoteApi(String apiVer, String api, byte[] payloadContent, String clientIpAddr){
+		AssistanceParameters assistanceParameters = new AssistanceParameters();
+		Payload payload;
+		ResponseEntity<byte[]> responseEntity;
+
+		if(apiVer.compareTo("v1.7") < 0){
+			payload = new Payload(payloadContent, 4);
+		}else{
+			payload = new Payload(payloadContent);
+		}
+		assistanceParameters.deviceId = toUnsignedString(payload.deviceId);
+		assistanceParameters.assistancePayload = payload.content;
+		responseEntity = remoteApi(apiVer, api, assistanceParameters, clientIpAddr, byte[].class);
+
+		return new GnssServiceResponse(responseEntity.getStatusCode(), responseEntity.getBody());
+	}
+}
+
+@Data
+class AssistanceParameters extends GnssServiceParameters{
+	@NotNull
+	@Schema(description = "Assistance data as sent by the Iot device",
+			example = "AAAAAA4AAAA=", required = true)
+	public byte[] assistancePayload;
 }
