@@ -33,6 +33,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.validation.constraints.NotNull;
@@ -103,8 +105,13 @@ public class NavigationService extends GnssService{
 		    for(PartnerService service : partnerServices){
 				int customerId = payload.customerId();
 				long deviceId = payload.deviceId;
-				GnssServiceResponse resp = service.onGnssPosition(customerId, deviceId, gnssPositionResults);
-				log.info("Partner's service {} returned status {} and content {}.", service.getClass().getName(), resp.status, new String(resp.message));
+				GnssServiceResponse resp;
+				try{
+					resp = service.onGnssPosition(customerId, deviceId, gnssPositionResults);
+					log.info("Partner's service {} returned status {} and content {}.", service.getClass().getName(), resp.status, new String(resp.message));
+				}catch(RestClientException e){
+					log.error("Unexpected partner server error:\n{}", e.getMessage());
+			    }
 		    }
 	    }
 		return response;
