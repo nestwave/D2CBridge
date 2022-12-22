@@ -13,10 +13,10 @@
   <springProfile name="prod">
 
     <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
-      <file>/var/logs/app-device.log</file>
+      <file>/var/log/app-device.log</file>
 
       <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-        <fileNamePattern>/var/logs/archived/app-device.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        <fileNamePattern>/var/log/archived/app-device.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
         <!-- each archived file, size max 10MB -->
         <maxFileSize>10MB</maxFileSize>
         <!-- total size of all archive files, if total size > 10GB, it will delete old archived file -->
