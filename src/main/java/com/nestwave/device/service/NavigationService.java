@@ -46,6 +46,7 @@ import static com.nestwave.device.util.GpsTime.getUtcAssistanceTime;
 import static java.util.Arrays.copyOf;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
+import static org.springframework.http.HttpStatus.OK;
 
 @Slf4j
 @Service
@@ -125,6 +126,9 @@ public class NavigationService extends GnssService{
 		}
 		responseEntity = remoteApi(apiVer, api, hybridNavigationParameters, clientIpAddr, GnssPositionResults.class);
 		response = savePosition(apiVer, payload, responseEntity);
+		if(response.status == OK){
+			response = new GnssServiceResponse(OK, hybridNavPayload.addTechno(responseEntity.getBody().technology, response.message));
+		}
 		return response;
 	}
 

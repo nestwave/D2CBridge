@@ -20,9 +20,12 @@ package com.nestwave.model;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.nio.ByteBuffer;
+
 import static java.lang.Integer.parseInt;
 import static java.lang.Integer.toUnsignedLong;
 import static java.lang.Math.min;
+import static java.nio.ByteBuffer.allocate;
 import static java.nio.ByteBuffer.wrap;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static java.util.Arrays.copyOf;
@@ -94,6 +97,15 @@ public class Payload{
 			wQty -= 360;
 		}
 		return c1 << 16 | c0;
+	}
+
+	public static byte[] appendFletcher32(byte[] data)
+	{
+		ByteBuffer buffer = allocate(data.length + 4).order(LITTLE_ENDIAN);
+
+		buffer.put(data);
+		buffer.putInt(fletcher32(data, data.length));
+		return buffer.array();
 	}
 
 	public int customerId()

@@ -1,15 +1,18 @@
 package com.nestwave.device.model;
 
 import com.nestwave.model.Payload;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import static com.nestwave.model.Payload.appendFletcher32;
 import static java.lang.Byte.toUnsignedInt;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 
+@Slf4j
 public class HybridNavPayload{
 	public final HybridNavMessage[] messages;
 
@@ -63,6 +66,26 @@ public class HybridNavPayload{
 			}
 		}
 		return rawMeas;
+	}
+
+	public byte[] addTechno(String technology, byte[] payload){
+		byte[] responsePayload = new byte[payload.length - 4 + 1]; /* Remove Fletcher 32 and add techno */
+
+		arraycopy(payload, 0, responsePayload, 1, responsePayload.length - 1);
+		for(HybridNavMessage message : messages){
+			try{
+				String techno = (String) message.getClass().getField("technology").get(null);
+				if(techno.equals(technology)){
+					responsePayload[0] = (byte) message.hybridHeader.techno;
+				}
+			}catch(NoSuchFieldException e){
+				log.error("Bad definition of class {}! Missing technology field.", message.getClass());
+			}catch (IllegalAccessException e){
+				log.error("Caught exception: {}", e.getMessage());
+			}
+		}
+		responsePayload = appendFletcher32(responsePayload);
+		return responsePayload;
 	}
 }
 
@@ -153,6 +176,7 @@ class HybridNavMessage{
 }
 
 class GnssData extends HybridNavMessage{
+	public static String technology = "GNSS";
 	public final byte[] rawMeas;
 
 	public GnssData(byte[] payload, int offset){
@@ -163,6 +187,7 @@ class GnssData extends HybridNavMessage{
 }
 
 class UserData extends HybridNavMessage{
+	public static String technology = "USER";
 	final byte[] data;
 
 	public UserData(byte[] payload, int offset){
@@ -173,6 +198,7 @@ class UserData extends HybridNavMessage{
 }
 
 class GnssMoreData extends HybridNavMessage{
+	public static String technology = "MORE";
 	final byte index;
 	final byte[] rawMeas;
 
@@ -185,6 +211,7 @@ class GnssMoreData extends HybridNavMessage{
 }
 
 class CellInfo extends HybridNavMessage{
+	public static String technology = "Cellular";
 	SingleCellInfo[] cellInfo;
 
 	public CellInfo(byte[] payload, int offset) throws InvalidHybridNavPayloadException{
@@ -203,6 +230,7 @@ class CellInfo extends HybridNavMessage{
 }
 
 class WifiInfo extends HybridNavMessage{
+	public static String technology = "Wi-Fi";
 	SingleWifiInfo[] wifiInfo = new SingleWifiInfo[5];
 
 	public WifiInfo(byte[] payload, int offset) throws InvalidHybridNavPayloadException{
@@ -220,6 +248,7 @@ class WifiInfo extends HybridNavMessage{
 }
 
 class BluetoothInfo extends HybridNavMessage{
+	public static String technology = "Bluetooth";
 	SingleBluetoothInfo[] bluetoothInfo = new SingleBluetoothInfo[5];
 
 	public BluetoothInfo(byte[] payload, int offset) throws InvalidHybridNavPayloadException{
@@ -237,6 +266,7 @@ class BluetoothInfo extends HybridNavMessage{
 }
 
 class PlatformStatus extends HybridNavMessage{
+	public static String technology = "Status";
 	byte battery;
 	byte batteryTemperature;
 	byte ambientTemperature;

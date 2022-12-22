@@ -25,6 +25,7 @@ public class GnssPositionResults{
 	public float[] velocity;
 	public GpsMeasurements gps;
 	public byte[] payload;
+	public String technology;
 }
 
 class GpsMeasurements{
