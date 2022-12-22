@@ -89,27 +89,7 @@ public class NavigationService extends GnssService{
 		}
 		navigationParameters = new NavigationParameters(payload);
 		ResponseEntity<GnssPositionResults> responseEntity = remoteApi(apiVer, api, navigationParameters, clientIpAddr, GnssPositionResults.class);
-	    GnssPositionResults gnssPositionResults = responseEntity.getBody();
-		try{
-			response = new GnssServiceResponse(responseEntity.getStatusCode(), objectMapper.writeValueAsBytes(gnssPositionResults));
-		}catch(JsonProcessingException e){
-			log.error("Error: {}", e);
-			response = new GnssServiceResponse(INTERNAL_SERVER_ERROR, "Cloud not serialize navigation results:\n" + gnssPositionResults);
-		}
-		if(response.status == HttpStatus.OK){
-		    response = savePositionIntoDatabase(apiVer, payload.deviceId, response.message);
-		    for(PartnerService service : partnerServices){
-				int customerId = payload.customerId();
-				long deviceId = payload.deviceId;
-				GnssServiceResponse resp;
-				try{
-					resp = service.onGnssPosition(customerId, deviceId, gnssPositionResults);
-					log.info("Partner's service {} returned status {} and content {}.", service.getClass().getName(), resp.status, new String(resp.message));
-				}catch(RestClientException e){
-					log.error("Unexpected partner server error:\n{}", e.getMessage());
-			    }
-		    }
-	    }
+		response = savePosition(apiVer, payload, responseEntity);
 		return response;
     }
 
@@ -129,6 +109,32 @@ public class NavigationService extends GnssService{
 		return new GnssServiceResponse(HttpStatus.OK, csv.getBytes());
 	}
 
+	public GnssServiceResponse savePosition(String apiVer, Payload payload, ResponseEntity<GnssPositionResults> responseEntity){
+		GnssServiceResponse response;
+		GnssPositionResults gnssPositionResults = responseEntity.getBody();
+
+		try{
+			response = new GnssServiceResponse(responseEntity.getStatusCode(), objectMapper.writeValueAsBytes(gnssPositionResults));
+		}catch(JsonProcessingException e){
+			log.error("Error when processing JSON: {}", e.getMessage());
+			response = new GnssServiceResponse(INTERNAL_SERVER_ERROR, "Cloud not serialize navigation results:\n" + gnssPositionResults);
+		}
+		if(response.status == HttpStatus.OK){
+			response = savePositionIntoDatabase(apiVer, payload.deviceId, response.message);
+			for(PartnerService service : partnerServices){
+				int customerId = payload.customerId();
+				long deviceId = payload.deviceId;
+				GnssServiceResponse resp;
+				try{
+					resp = service.onGnssPosition(customerId, deviceId, gnssPositionResults);
+					log.info("Partner's service {} returned status {} and content {}.", service.getClass().getName(), resp.status, new String(resp.message));
+				}catch(RestClientException e){
+					log.error("Unexpected partner server error:\n{}", e.getMessage());
+				}
+			}
+		}
+		return response;
+	}
 	public GnssServiceResponse savePositionIntoDatabase(String apiVer, long deviceId, byte[] json){
 		log.info("Decoded position:\n{}", new String(json));
 		GnssPositionResults navResults;
