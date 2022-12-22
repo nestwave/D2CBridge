@@ -39,7 +39,6 @@ import org.springframework.web.client.RestTemplate;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
-import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES;
 import static com.nestwave.device.util.GpsTime.getUtcAssistanceTime;
 import static java.util.Arrays.copyOf;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -132,11 +131,9 @@ public class NavigationService extends GnssService{
 
 	public GnssServiceResponse savePositionIntoDatabase(String apiVer, long deviceId, byte[] json){
 		log.info("Decoded position:\n{}", new String(json));
-		ObjectMapper mapper = new ObjectMapper();
 		GnssPositionResults navResults;
-		mapper.configure(ALLOW_UNQUOTED_FIELD_NAMES, true);
 		try{
-			navResults = mapper.readValue(json, GnssPositionResults.class);
+			navResults = objectMapper.readValue(json, GnssPositionResults.class);
 		}catch(IOException e){
 			log.error("Error parsing json : {}", e.getMessage());
 			return new GnssServiceResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Parsing position failed");
