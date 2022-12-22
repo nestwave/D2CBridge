@@ -37,6 +37,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.nio.charset.Charset;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES;
+import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 import static java.lang.Long.toUnsignedString;
 import static org.apache.tomcat.util.codec.binary.Base64.encodeBase64String;
 
@@ -50,7 +53,10 @@ public abstract class GnssService {
     public GnssService(JwtTokenUtil jwtTokenUtil, String uri, RestTemplate restTemplate, ObjectMapper om){
         this.jwtTokenUtil = jwtTokenUtil;
         uriBase = uri;
-        objectMapper = om;
+        objectMapper = om.
+                configure(ALLOW_UNQUOTED_FIELD_NAMES, true).
+                setSerializationInclusion(NON_NULL).
+                enable(INDENT_OUTPUT);
         this.restTemplate = restTemplate;
     }
     public abstract boolean supports(String apiVer);
