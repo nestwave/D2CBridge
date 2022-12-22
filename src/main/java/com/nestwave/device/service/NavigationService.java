@@ -20,6 +20,9 @@ package com.nestwave.device.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nestwave.device.model.HybridNavParameters;
+import com.nestwave.device.model.HybridNavPayload;
+import com.nestwave.device.model.InvalidHybridNavPayloadException;
 import com.nestwave.device.repository.position.PositionRecord;
 import com.nestwave.device.repository.position.PositionRepository;
 import com.nestwave.device.util.JwtTokenUtil;
@@ -42,6 +45,7 @@ import java.io.IOException;
 import static com.nestwave.device.util.GpsTime.getUtcAssistanceTime;
 import static java.util.Arrays.copyOf;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
 
 @Slf4j
 @Service
@@ -98,6 +102,30 @@ public class NavigationService extends GnssService{
 		log.info("Drop all positions for deviceId = {}", deviceId);
 		positionRepository.dropAllPositionRecordsWithId(deviceId);
 		return new GnssServiceResponse(HttpStatus.OK, (byte[])null);
+	}
+
+	public GnssServiceResponse locate(String apiVer, byte[] rawResults, String clientIpAddr){
+		Payload payload = new Payload(rawResults);
+		HybridNavPayload hybridNavPayload;
+		HybridNavigationParameters hybridNavigationParameters;
+		ResponseEntity<GnssPositionResults> responseEntity;
+		GnssServiceResponse response;
+		String api = "locate";
+
+		try{
+			hybridNavPayload = new HybridNavPayload(payload);
+		}catch(InvalidHybridNavPayloadException e){
+			return new GnssServiceResponse(NOT_ACCEPTABLE, e.getMessage());
+		}
+		hybridNavigationParameters = new HybridNavigationParameters(payload, hybridNavPayload);
+		try{
+			log.info("hybridNavigationParameters = {}", objectMapper.writeValueAsString(hybridNavigationParameters));
+		}catch(Exception e){
+			log.error("Error when processing JSON: {}", e.getMessage());
+		}
+		responseEntity = remoteApi(apiVer, api, hybridNavigationParameters, clientIpAddr, GnssPositionResults.class);
+		response = savePosition(apiVer, payload, responseEntity);
+		return response;
 	}
 
 	public GnssServiceResponse retrievePositionsFromDatabase(long deviceId)
@@ -167,5 +195,18 @@ class NavigationParameters extends GnssServiceParameters{
 	public NavigationParameters(Payload payload){
 		super(payload);
 		rawMeas = payload.content;
+	}
+}
+
+@Data
+class HybridNavigationParameters extends NavigationParameters{
+	@Schema(description = "Hybrid navigation data as expected by the third party services")
+	public HybridNavParameters hybrid;
+
+	public HybridNavigationParameters(Payload payload, HybridNavPayload hybridNavPayload){
+		super(payload);
+
+		rawMeas = hybridNavPayload.rawMeas();
+		hybrid = new HybridNavParameters(hybridNavPayload);
 	}
 }
