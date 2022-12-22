@@ -21,6 +21,7 @@ package com.nestwave.device.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nestwave.device.util.JwtTokenUtil;
+import com.nestwave.model.Payload;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.nio.charset.Charset;
 
+import static java.lang.Long.toUnsignedString;
 import static org.apache.tomcat.util.codec.binary.Base64.encodeBase64String;
 
 @Slf4j
@@ -84,7 +86,7 @@ public abstract class GnssService {
             try{
                 strResponse = objectMapper.writeValueAsString(response);
             }catch(JsonProcessingException e){
-                log.error("Error: {}", e);
+                log.error("Error when processing JSON: {}", e.getMessage());
             }
         }
         log.info("Received answer: status: {}, payload: {}", responseEntity.getStatusCode(), strResponse);
@@ -98,4 +100,8 @@ class GnssServiceParameters{
     @Size(groups = String.class, min = 1, max = 32)
     @Schema(description = "Device ID", required = false)
     public String deviceId;
+
+    public GnssServiceParameters(Payload payload){
+        deviceId = toUnsignedString(payload.deviceId);
+    }
 }

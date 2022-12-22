@@ -49,7 +49,7 @@ public class AssistanceService extends GnssService{
 	}
 
 	public GnssServiceResponse remoteApi(String apiVer, String api, byte[] payloadContent, String clientIpAddr){
-		AssistanceParameters assistanceParameters = new AssistanceParameters();
+		AssistanceParameters assistanceParameters;
 		Payload payload;
 		ResponseEntity<byte[]> responseEntity;
 
@@ -58,8 +58,7 @@ public class AssistanceService extends GnssService{
 		}else{
 			payload = new Payload(payloadContent);
 		}
-		assistanceParameters.deviceId = toUnsignedString(payload.deviceId);
-		assistanceParameters.assistancePayload = payload.content;
+		assistanceParameters = new AssistanceParameters(payload);
 		responseEntity = remoteApi(apiVer, api, assistanceParameters, clientIpAddr, byte[].class);
 
 		return new GnssServiceResponse(responseEntity.getStatusCode(), responseEntity.getBody());
@@ -72,4 +71,9 @@ class AssistanceParameters extends GnssServiceParameters{
 	@Schema(description = "Assistance data as sent by the Iot device",
 			example = "AAAAAA4AAAA=", required = true)
 	public byte[] assistancePayload;
+
+	public AssistanceParameters(Payload payload){
+		super(payload);
+		assistancePayload = payload.content;
+	}
 }

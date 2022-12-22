@@ -33,7 +33,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -42,7 +41,6 @@ import java.io.IOException;
 
 import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES;
 import static com.nestwave.device.util.GpsTime.getUtcAssistanceTime;
-import static java.lang.Long.toUnsignedString;
 import static java.util.Arrays.copyOf;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -75,7 +73,7 @@ public class NavigationService extends GnssService{
 	}
 
 	public GnssServiceResponse gnssPosition(String apiVer, byte[] rawResults, String clientIpAddr, boolean noc){
-		NavigationParameters navigationParameters = new NavigationParameters();
+		NavigationParameters navigationParameters;
 		Payload payload;
 	    GnssServiceResponse response;
 	    String api;
@@ -90,8 +88,7 @@ public class NavigationService extends GnssService{
 		}else{
 			payload = new Payload(rawResults);
 		}
-		navigationParameters.deviceId = toUnsignedString(payload.deviceId);
-		navigationParameters.rawMeas = payload.content;
+		navigationParameters = new NavigationParameters(payload);
 		ResponseEntity<GnssPositionResults> responseEntity = remoteApi(apiVer, api, navigationParameters, clientIpAddr, GnssPositionResults.class);
 	    GnssPositionResults gnssPositionResults = responseEntity.getBody();
 		try{
@@ -160,7 +157,12 @@ public class NavigationService extends GnssService{
 @Data
 class NavigationParameters extends GnssServiceParameters{
 	@NotNull
-	@Schema(description = "Assistance data as sent by the Iot device",
+	@Schema(description = "GNSS raw measurements data as sent by the Iot device",
 			example = "AAAAAA4AAAA=", required = true)
 	public byte[] rawMeas;
+
+	public NavigationParameters(Payload payload){
+		super(payload);
+		rawMeas = payload.content;
+	}
 }
