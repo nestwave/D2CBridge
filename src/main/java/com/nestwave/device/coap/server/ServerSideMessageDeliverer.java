@@ -52,6 +52,7 @@ public class ServerSideMessageDeliverer extends ServerMessageDeliverer {
 					case "gnssAssistance": return coapAssistanceResource.new GnssAssistance();
 	                case "gnssDevicePosition": return coapNavigationResource.new NavigationResource(false);
 	                case "gnssPosition": return coapNavigationResource.new NavigationResource(true);
+	                case "locate": return coapNavigationResource.new HybridNavigationResource();
                 }
             }
         }
