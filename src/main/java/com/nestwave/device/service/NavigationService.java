@@ -136,7 +136,7 @@ public class NavigationService extends GnssService{
 	{
 		String csv;
 
-		log.info("Query all positions for deviceId = {}", deviceId);
+		log.debug("Query all positions for deviceId = {}", deviceId);
 		csv = positionRepository.getAllPositionRecordsWithId(deviceId);
 		return new GnssServiceResponse(HttpStatus.OK, csv.getBytes());
 	}

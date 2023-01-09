@@ -105,7 +105,7 @@ public class EndPoint{
 	public GnssServiceResponse gnssPositionsGet(@NonNull String apiVer, Long deviceId, String clientIpAddr, boolean drop){
 		GnssServiceResponse response;
 
-		log.info("Request from IP: {}, API: /{}/gnssPositionsGet?deviceId={}&drop={}", clientIpAddr, apiVer, deviceId, drop);
+		log.debug("Request from IP: {}, API: /{}/gnssPositionsGet?deviceId={}&drop={}", clientIpAddr, apiVer, deviceId, drop);
 		if(deviceId == null){
 			log.error("Rejected due to missing mandatory parameter deviceId");
 			response = new GnssServiceResponse(HttpStatus.EXPECTATION_FAILED, "Please supply a deviceId parameter.");
