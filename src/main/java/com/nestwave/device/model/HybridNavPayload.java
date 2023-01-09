@@ -231,7 +231,7 @@ class CellInfo extends HybridNavMessage{
 
 class WifiInfo extends HybridNavMessage{
 	public static String technology = "Wi-Fi";
-	SingleWifiInfo[] wifiInfo = new SingleWifiInfo[5];
+	SingleWifiInfo[] wifiInfo;
 
 	public WifiInfo(byte[] payload, int offset) throws InvalidHybridNavPayloadException{
 		super(payload, offset);
@@ -239,6 +239,7 @@ class WifiInfo extends HybridNavMessage{
 		if(hybridHeader.length != N * SingleWifiInfo.size){
 			throw new InvalidHybridNavPayloadException("Invalid inner structure size (alignement issue on SingleWifiInfo?): got %d expected %d", hybridHeader.length, N * SingleWifiInfo.size);
 		}
+		wifiInfo = new SingleWifiInfo[N];
 		byte[] data = new byte[SingleWifiInfo.size];
 		for(int n = 0; n < N; n += 1){
 			arraycopy(payload, offset + 2 + n * data.length, data, 0, data.length);
@@ -249,7 +250,7 @@ class WifiInfo extends HybridNavMessage{
 
 class BluetoothInfo extends HybridNavMessage{
 	public static String technology = "Bluetooth";
-	SingleBluetoothInfo[] bluetoothInfo = new SingleBluetoothInfo[5];
+	SingleBluetoothInfo[] bluetoothInfo;
 
 	public BluetoothInfo(byte[] payload, int offset) throws InvalidHybridNavPayloadException{
 		super(payload, offset);
@@ -257,6 +258,7 @@ class BluetoothInfo extends HybridNavMessage{
 		if(hybridHeader.length != N * SingleBluetoothInfo.size){
 			throw new InvalidHybridNavPayloadException("Invalid inner structure size (alignement issue on SingleCellInfo?): got %d expected %d", hybridHeader.length, N * SingleBluetoothInfo.size);
 		}
+		bluetoothInfo = new SingleBluetoothInfo[N];
 		byte[] data = new byte[SingleBluetoothInfo.size];
 		for(int n = 0; n < N; n += 1){
 			arraycopy(payload, offset + 2 + n * data.length, data, 0, data.length);

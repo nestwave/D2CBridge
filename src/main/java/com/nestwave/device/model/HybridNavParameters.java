@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import static java.lang.Byte.toUnsignedInt;
+import static java.lang.Integer.toHexString;
+import static java.lang.String.join;
 
 @Data
 public class HybridNavParameters{
@@ -63,17 +65,29 @@ class MacAddress48{
 			v[n] = toUnsignedInt(payload[n]);
 		}
 	}
+
+	public String toString(){
+		return join(":", toStringArray());
+	}
+
+	public String[] toStringArray(){
+		String[] V = new String[v.length];
+		for(int n = 0; n < V.length; n += 1){
+			V[n] = toHexString(v[n]);
+		}
+		return V;
+	}
 }
 
 @Data
 class SingleWifiInfo{
 	static int size = MacAddress48.size + 2; /* C struct size */
-	MacAddress48 mac;
+	String mac;
 	int rssi; /* int16 ==> 2B */
 
 	SingleWifiInfo(byte[] payload){
 		assert payload.length == size;
-		mac = new MacAddress48(payload);
+		mac = new MacAddress48(payload).toString();
 		rssi = toUnsignedInt(payload[MacAddress48.size]) + (toUnsignedInt(payload[MacAddress48.size + 1]) << 8) - (1 << 16);
 	}
 }
@@ -81,12 +95,12 @@ class SingleWifiInfo{
 @Data
 class SingleBluetoothInfo{
 	static int size = MacAddress48.size + 2; /* C struct size */
-	MacAddress48 mac;
+	String mac;
 	int rssi; /* int16 ==> 2B */
 
 	SingleBluetoothInfo(byte[] payload){
 		assert payload.length == size;
-		mac = new MacAddress48(payload);
+		mac = new MacAddress48(payload).toString();
 		rssi = toUnsignedInt(payload[MacAddress48.size]) + (toUnsignedInt(payload[MacAddress48.size + 1]) << 8) - (1 << 16);
 	}
 }

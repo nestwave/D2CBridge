@@ -32,8 +32,6 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.validation.constraints.NotNull;
 
-import static java.lang.Long.toUnsignedString;
-
 @Slf4j
 @Service
 public class AssistanceService extends GnssService{
