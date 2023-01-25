@@ -108,7 +108,8 @@ jwt:
 partners:
   traxmate:
     url: https://online.traxmate.io:3000
-    customerIdList: 0x0 # Class-A addresses used by Nestwave test devices
+    # Special customerId values used to store device position into Traxmate DB
+    customerIdList: 0, 1, 2, 3
     token: ${TRAXMATE_TOKEN:} # Service will be disabled if no token is passed
     api:
       submitPosition: /capture/service/${partners.traxmate.token}/device/@{deviceId}
