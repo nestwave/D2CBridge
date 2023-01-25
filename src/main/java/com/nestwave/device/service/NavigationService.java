@@ -145,7 +145,12 @@ public class NavigationService extends GnssService{
 	public GnssServiceResponse savePosition(String apiVer, Payload payload, ResponseEntity<GnssPositionResults> responseEntity){
 		GnssServiceResponse response;
 		GnssPositionResults gnssPositionResults = responseEntity.getBody();
+		int customerId = payload.customerId();
+		long deviceId = payload.deviceId;
 
+		if(deviceId == 0){
+			return new GnssServiceResponse(responseEntity.getStatusCode(), gnssPositionResults.payload);
+		}
 		try{
 			response = new GnssServiceResponse(responseEntity.getStatusCode(), objectMapper.writeValueAsBytes(gnssPositionResults));
 		}catch(JsonProcessingException e){
@@ -155,8 +160,6 @@ public class NavigationService extends GnssService{
 		if(response.status == HttpStatus.OK){
 			response = savePositionIntoDatabase(apiVer, payload.deviceId, response.message);
 			for(PartnerService service : partnerServices){
-				int customerId = payload.customerId();
-				long deviceId = payload.deviceId;
 				GnssServiceResponse resp;
 				try{
 					resp = service.onGnssPosition(customerId, deviceId, gnssPositionResults);
@@ -178,14 +181,12 @@ public class NavigationService extends GnssService{
 			return new GnssServiceResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Parsing position failed");
 		}
 		log.info("gpsTime = {}", navResults.gpsTime);
-		if(deviceId != 0){
-			PositionRecord positionRecord = new PositionRecord(deviceId, getUtcAssistanceTime(navResults.gpsTime),
-					navResults.confidence,
-					navResults.position[0], navResults.position[1], navResults.position[2],
-					navResults.velocity[0], navResults.velocity[1], navResults.velocity[2]);
-			positionRepository.insertNavigationRecord(positionRecord);
-			log.info("New position inserted in positions database.");
-		}
+		PositionRecord positionRecord = new PositionRecord(deviceId, getUtcAssistanceTime(navResults.gpsTime),
+				navResults.confidence,
+				navResults.position[0], navResults.position[1], navResults.position[2],
+				navResults.velocity[0], navResults.velocity[1], navResults.velocity[2]);
+		positionRepository.insertNavigationRecord(positionRecord);
+		log.info("New position inserted in positions database.");
 		return new GnssServiceResponse(HttpStatus.OK, navResults.payload);
 	}
 }
