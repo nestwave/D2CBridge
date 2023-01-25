@@ -44,9 +44,7 @@ import java.io.IOException;
 
 import static com.nestwave.device.util.GpsTime.getUtcAssistanceTime;
 import static java.util.Arrays.copyOf;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 
 @Slf4j
 @Service
@@ -113,6 +111,9 @@ public class NavigationService extends GnssService{
 		GnssServiceResponse response;
 		String api = "locate";
 
+		if(payload.deviceId == 0){
+			return new GnssServiceResponse(UNAUTHORIZED, "Invalid device ID");
+		}
 		try{
 			hybridNavPayload = new HybridNavPayload(payload);
 		}catch(InvalidHybridNavPayloadException e){
