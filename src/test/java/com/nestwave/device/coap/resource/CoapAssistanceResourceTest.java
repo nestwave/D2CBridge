@@ -20,8 +20,6 @@ package com.nestwave.device.coap.resource;
 
 import com.nestwave.device.DeviceApplication;
 import com.nestwave.device.config.DeviceConfig;
-import com.nestwave.device.resource.AssistanceResource;
-import com.nestwave.device.service.AssistanceService;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapResponse;
@@ -35,7 +33,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.io.IOException;
 
 import static com.nestwave.device.util.GpsTime.getGpsTime;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)

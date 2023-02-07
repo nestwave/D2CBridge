@@ -21,7 +21,6 @@ package com.nestwave.device.service;
 import com.nestwave.device.repository.position.PositionRepository;
 import com.nestwave.device.util.JwtTokenUtil;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,21 +28,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.Month;
-
-import static com.nestwave.device.util.GpsTime.getGpsAssistanceTime;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(Lifecycle.PER_CLASS)
@@ -86,6 +75,6 @@ class NavigationServiceTest {
   public void init() {
     navigationService = new NavigationService(new JwtTokenUtil(file, period),
 		                                      navigationRepository,
-                                              navigationUrl, null, restTemplate, backgroundUrl);
+                                              navigationUrl, null, restTemplate);
   }
 }

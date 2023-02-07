@@ -56,8 +56,7 @@ public class NavigationService extends GnssService{
 	                         PositionRepository positionRepository,
                            @Value("${navigation.base_url}") String uri,
 	                         ObjectMapper objectMapper,
-                           RestTemplate restTemplate,
-                           @Value("${background.base_url}") String backgroundUrl) {
+	                         RestTemplate restTemplate){
 		super(jwtTokenUtil, uri, restTemplate, objectMapper);
 		this.positionRepository = positionRepository;
 	partnerServices = new PartnerService[0];

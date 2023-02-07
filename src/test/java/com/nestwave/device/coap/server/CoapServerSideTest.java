@@ -31,8 +31,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = DeviceApplication.class)

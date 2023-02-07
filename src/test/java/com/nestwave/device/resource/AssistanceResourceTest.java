@@ -20,7 +20,6 @@ package com.nestwave.device.resource;
 
 import com.nestwave.device.DeviceApplication;
 import com.nestwave.device.config.DeviceConfig;
-import com.nestwave.device.service.AssistanceService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

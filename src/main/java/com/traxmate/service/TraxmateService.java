@@ -29,12 +29,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.nio.charset.Charset;
 
 import static java.lang.Long.toUnsignedString;
 import static java.lang.String.format;
@@ -76,7 +73,6 @@ public class TraxmateService implements PartnerService{
 		api = format(api, apiParameters);
 		log.info("Request to API: {}/{}", uriBase, api);
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(uriBase + "/" + api);
-		restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(Charset.forName("UTF-8")));
 		uri = builder.toUriString();
 		log.info("Request forwarded to: {}", uri);
 		responseEntity = restTemplate.postForEntity(uri, requestEntity, byte[].class, data);

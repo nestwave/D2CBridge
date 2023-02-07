@@ -33,12 +33,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -132,7 +130,6 @@ class JwtUpdateSchedulerService implements  Runnable{
 		headers.set("Authorization", secret);
 		HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
-		restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(Charset.forName("UTF-8")));
 		String uri = builder.toUriString();
 
 		log.info("Updating JWT from: {}", uri);
