@@ -29,13 +29,11 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.nio.charset.Charset;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES;
@@ -80,7 +78,6 @@ public abstract class GnssService {
         log.info("Request from IP: {}, API: /{}/{}}", clientIpAddr, apiVer, api);
         log.info("deviceId = {}, payload = \"{}\"", payload.deviceId, payload);
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(uriBase + apiVer + "/" + api);
-        restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(Charset.forName("UTF-8")));
         uri = builder.toUriString();
         log.info("Request forwarded to: {}", uri);
         responseEntity = restTemplate.postForEntity(uri, requestEntity, responseType);
