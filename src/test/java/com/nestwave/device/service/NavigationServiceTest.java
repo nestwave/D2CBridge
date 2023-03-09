@@ -50,9 +50,6 @@ class NavigationServiceTest {
   @Value("${navigation.base_url}")
   String navigationUrl="http://navigation:8088/navigation/";
 
-  @Value("${background.base_url}")
-  String backgroundUrl="http://background:8086/ephemeris/";
-
   @Value("${position.directory}")
   String scriptDirectory="/opt/app/gpsNavAppTest";
 

@@ -32,9 +32,6 @@ server:
   http:
     port: 8087
 
-background:
-  base_url: http://background:8086/
-
 navigation:
   base_url: https://navigation:8443/
 
