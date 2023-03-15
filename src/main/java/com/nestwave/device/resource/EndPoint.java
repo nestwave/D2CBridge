@@ -29,6 +29,7 @@ import org.springframework.http.HttpStatus;
 
 import static java.lang.String.format;
 import static org.apache.tomcat.util.codec.binary.Base64.encodeBase64String;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Slf4j
 public class EndPoint{
@@ -84,21 +85,20 @@ public class EndPoint{
 		}
 	}
 
-	public GnssServiceResponse gnssPosition(@NonNull String apiVer, byte [] rawResults, String clientIpAddr, boolean noc){
+	public GnssServiceResponse gnssPosition(@NonNull String apiVer, byte [] reqPayload, String clientIpAddr, boolean noc){
 		Payload payload;
 		GnssServiceResponse response;
 		String strPayload;
 
-		//request from IP: 178.208.16.92, getAssistance by date : 2018-06-02T18:00:25 (GPS Time: 1211997625)
-		log.info("Request from IP: {}, API: /{}/gnssPosition", clientIpAddr, apiVer);
+		log.info("Request from IP: {}, API: /{}/gnssPosition, reqPayload = {}", clientIpAddr, apiVer, encodeBase64String(reqPayload));
 		if(apiVer.compareTo("v1.7") < 0){
-			payload = new Payload(rawResults, 4);
+			payload = new Payload(reqPayload, 4);
 		}else{
-			payload = new Payload(rawResults);
+			payload = new Payload(reqPayload);
 		}
 		strPayload = encodeBase64String(payload.content);
 		log.info("deviceId = {}, chkWord = {}, rawResults = \"{}\"", payload.deviceId, payload.chkWord, strPayload);
-		response = navigationService.gnssPosition(apiVer, rawResults, clientIpAddr, noc);
+		response = navigationService.gnssPosition(apiVer, reqPayload, clientIpAddr, noc);
 		return response;
 	}
 
@@ -115,6 +115,26 @@ public class EndPoint{
 				navigationService.dropPositionsFromDatabase(deviceId);
 			}
 		}
+		return response;
+	}
+
+	public GnssServiceResponse locate(@NonNull String apiVer, byte [] reqPayload, String clientIpAddr){
+		Payload payload;
+		GnssServiceResponse response;
+		String strPayload;
+
+		log.info("Request from IP: {}, API: /{}/locate, reqPayload = {}", clientIpAddr, apiVer, encodeBase64String(reqPayload));
+		if(apiVer.compareTo("v1.7") < 0){
+			payload = new Payload(reqPayload, 4);
+		}else{
+			payload = new Payload(reqPayload);
+		}
+		strPayload = encodeBase64String(payload.content);
+		log.info("deviceId = {}, chkWord = {}, payload = \"{}\"", payload.deviceId, payload.chkWord, strPayload);
+		if(payload.deviceId == 0){
+			return new GnssServiceResponse(UNAUTHORIZED, "Invalid device ID");
+		}
+		response = navigationService.locate(apiVer, payload, clientIpAddr);
 		return response;
 	}
 }

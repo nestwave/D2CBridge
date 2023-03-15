@@ -24,10 +24,10 @@ public class HybridNavigationResource extends EndPoint{
 	}
 
 	@PostMapping(value = {"/locate", "p"}, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-	public ResponseEntity<Object> gnssPosition(@PathVariable String apiVer, @RequestBody byte [] payload, HttpServletRequest request) {
+	public ResponseEntity<Object> locate(@PathVariable String apiVer, @RequestBody byte [] reqPayload, HttpServletRequest request) {
 		GnssServiceResponse response;
 
-		response = navigationService.locate(apiVer, payload, getClientIpAddr(request));
+		response = locate(apiVer, reqPayload, getClientIpAddr(request));
 		return buildResponse(response);
 	}
 

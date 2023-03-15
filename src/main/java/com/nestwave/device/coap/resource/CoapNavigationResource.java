@@ -65,10 +65,10 @@ public class CoapNavigationResource extends EndPoint{
 		@Override
 		public void handlePOST(CoapExchange exchange) {
 			String apiVer = exchange.getRequestOptions().getUriPath().get(0);
-			byte [] rawResults = exchange.getRequestPayload();
+			byte [] reqPayload = exchange.getRequestPayload();
 			GnssServiceResponse response;
 
-			response = navigationService.locate(apiVer, rawResults, getClientIpAddr(exchange));
+			response = locate(apiVer, reqPayload, getClientIpAddr(exchange));
 			exchange.respond(response.getCoapStatus(), response.message);
 		}
 	}

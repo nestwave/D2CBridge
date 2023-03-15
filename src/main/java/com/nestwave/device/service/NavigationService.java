@@ -102,17 +102,13 @@ public class NavigationService extends GnssService{
 		return new GnssServiceResponse(HttpStatus.OK, (byte[])null);
 	}
 
-	public GnssServiceResponse locate(String apiVer, byte[] rawResults, String clientIpAddr){
-		Payload payload = new Payload(rawResults);
+	public GnssServiceResponse locate(String apiVer, Payload payload, String clientIpAddr){
 		HybridNavPayload hybridNavPayload;
 		HybridNavigationParameters hybridNavigationParameters;
 		ResponseEntity<GnssPositionResults> responseEntity;
 		GnssServiceResponse response;
 		String api = "locate";
 
-		if(payload.deviceId == 0){
-			return new GnssServiceResponse(UNAUTHORIZED, "Invalid device ID");
-		}
 		try{
 			hybridNavPayload = new HybridNavPayload(payload);
 		}catch(InvalidHybridNavPayloadException e){
