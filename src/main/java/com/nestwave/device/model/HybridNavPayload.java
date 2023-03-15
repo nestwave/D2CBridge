@@ -68,6 +68,25 @@ public class HybridNavPayload{
 		return rawMeas;
 	}
 
+	public byte[][] userData(){
+		byte[][] data;
+		int index = 0;
+
+		for(HybridNavMessage message : messages){
+			if(message instanceof UserData){
+				index += 1;
+			}
+		}
+		data = new byte[index][];
+		index = 0;
+		for(HybridNavMessage message : messages){
+			if(message instanceof UserData){
+				data[index] = ((UserData) message).data;
+			}
+		}
+		return data;
+	}
+
 	public byte[] addTechno(String technology, byte[] payload){
 		byte[] responsePayload = new byte[payload.length - 4 + 1]; /* Remove Fletcher 32 and add techno */
 
@@ -264,20 +283,5 @@ class BluetoothInfo extends HybridNavMessage{
 			arraycopy(payload, offset + 2 + n * data.length, data, 0, data.length);
 			bluetoothInfo[n] = new SingleBluetoothInfo(data);
 		}
-	}
-}
-
-class PlatformStatus extends HybridNavMessage{
-	public static String technology = "Status";
-	byte battery;
-	byte batteryTemperature;
-	byte ambientTemperature;
-
-	public PlatformStatus(byte[] payload, int offset){
-		super(payload, offset);
-		assert hybridHeader.length == 3;
-		battery = payload[offset + 3];
-		batteryTemperature = payload[offset + 4];
-		ambientTemperature = payload[offset + 5];
 	}
 }

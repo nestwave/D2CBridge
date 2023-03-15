@@ -20,11 +20,10 @@ package com.nestwave.device.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nestwave.device.model.HybridNavParameters;
-import com.nestwave.device.model.HybridNavPayload;
-import com.nestwave.device.model.InvalidHybridNavPayloadException;
+import com.nestwave.device.model.*;
 import com.nestwave.device.repository.position.PositionRecord;
 import com.nestwave.device.repository.position.PositionRepository;
+import com.nestwave.device.repository.thintrack.ThinTrackPlatformStatusRecord;
 import com.nestwave.device.util.JwtTokenUtil;
 import com.nestwave.model.GnssPositionResults;
 import com.nestwave.model.Payload;
@@ -123,6 +122,13 @@ public class NavigationService extends GnssService{
 		responseEntity = remoteApi(apiVer, api, hybridNavigationParameters, clientIpAddr, GnssPositionResults.class);
 		response = savePosition(apiVer, payload, responseEntity);
 		if(response.status == OK){
+			ThinTrackPlatformStatusRecord[] thinTrackPlatformStatusRecords = ThinTrackPlatformStatusRecord.of(hybridNavPayload);
+			for(ThinTrackPlatformStatusRecord thinTrackPlatformStatusRecord : thinTrackPlatformStatusRecords){
+				log.info("ThinkTrack platform status: {}", thinTrackPlatformStatusRecord);
+				if(thinTrackPlatformStatusRecord != null){
+					thinTrackPlatformStatusRecord.save();
+				}
+			}
 			response = new GnssServiceResponse(OK, hybridNavPayload.addTechno(responseEntity.getBody().technology, response.message));
 		}
 		return response;
