@@ -19,6 +19,7 @@
 package com.nestwave.device.service;
 
 import com.nestwave.device.repository.position.PositionRepository;
+import com.nestwave.device.repository.thintrack.ThinTrackPlatformStatusRepository;
 import com.nestwave.device.util.JwtTokenUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
@@ -65,6 +66,9 @@ class NavigationServiceTest {
 	@Mock
     PositionRepository navigationRepository;
 
+	@Mock
+	ThinTrackPlatformStatusRepository thinTrackPlatformStatusRepository;
+
   @InjectMocks
   NavigationService navigationService;
 
@@ -72,6 +76,7 @@ class NavigationServiceTest {
   public void init() {
     navigationService = new NavigationService(new JwtTokenUtil(file, period),
 		                                      navigationRepository,
+		                                      thinTrackPlatformStatusRepository,
                                               navigationUrl, null, restTemplate);
   }
 }

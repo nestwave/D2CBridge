@@ -24,6 +24,7 @@ import com.nestwave.device.model.*;
 import com.nestwave.device.repository.position.PositionRecord;
 import com.nestwave.device.repository.position.PositionRepository;
 import com.nestwave.device.repository.thintrack.ThinTrackPlatformStatusRecord;
+import com.nestwave.device.repository.thintrack.ThinTrackPlatformStatusRepository;
 import com.nestwave.device.util.JwtTokenUtil;
 import com.nestwave.model.GnssPositionResults;
 import com.nestwave.model.Payload;
@@ -40,6 +41,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
+import java.time.ZonedDateTime;
 
 import static com.nestwave.device.util.GpsTime.getUtcAssistanceTime;
 import static java.util.Arrays.copyOf;
@@ -49,15 +51,18 @@ import static org.springframework.http.HttpStatus.*;
 @Service
 public class NavigationService extends GnssService{
 	private final PositionRepository positionRepository;
+	private final ThinTrackPlatformStatusRepository thintrackPlatformStatusRepository;
 	private PartnerService[] partnerServices;
 
 	public NavigationService(JwtTokenUtil jwtTokenUtil,
 	                         PositionRepository positionRepository,
+	                         ThinTrackPlatformStatusRepository thintrackPlatformStatusRepository,
                            @Value("${navigation.base_url}") String uri,
 	                         ObjectMapper objectMapper,
 	                         RestTemplate restTemplate){
 		super(jwtTokenUtil, uri, restTemplate, objectMapper);
 		this.positionRepository = positionRepository;
+		this.thintrackPlatformStatusRepository = thintrackPlatformStatusRepository;
 	partnerServices = new PartnerService[0];
   }
 
@@ -122,11 +127,11 @@ public class NavigationService extends GnssService{
 		responseEntity = remoteApi(apiVer, api, hybridNavigationParameters, clientIpAddr, GnssPositionResults.class);
 		response = savePosition(apiVer, payload, responseEntity);
 		if(response.status == OK){
-			ThinTrackPlatformStatusRecord[] thinTrackPlatformStatusRecords = ThinTrackPlatformStatusRecord.of(hybridNavPayload);
+			ThinTrackPlatformStatusRecord[] thinTrackPlatformStatusRecords = ThinTrackPlatformStatusRecord.of(payload.deviceId, getUtcAssistanceTime(response.gpsTime), hybridNavPayload);
 			for(ThinTrackPlatformStatusRecord thinTrackPlatformStatusRecord : thinTrackPlatformStatusRecords){
 				log.info("ThinkTrack platform status: {}", thinTrackPlatformStatusRecord);
 				if(thinTrackPlatformStatusRecord != null){
-					thinTrackPlatformStatusRecord.save();
+					thintrackPlatformStatusRepository.insertNewRecord(thinTrackPlatformStatusRecord);
 				}
 			}
 			response = new GnssServiceResponse(OK, hybridNavPayload.addTechno(responseEntity.getBody().technology, response.message));
@@ -175,6 +180,8 @@ public class NavigationService extends GnssService{
 	public GnssServiceResponse savePositionIntoDatabase(String apiVer, long deviceId, byte[] json){
 		log.info("Decoded position:\n{}", new String(json));
 		GnssPositionResults navResults;
+		ZonedDateTime gpsTime;
+
 		try{
 			navResults = objectMapper.readValue(json, GnssPositionResults.class);
 		}catch(IOException e){
@@ -188,7 +195,7 @@ public class NavigationService extends GnssService{
 				navResults.velocity[0], navResults.velocity[1], navResults.velocity[2]);
 		positionRepository.insertNavigationRecord(positionRecord);
 		log.info("New position inserted in positions database.");
-		return new GnssServiceResponse(HttpStatus.OK, navResults.payload);
+		return new GnssServiceResponse(HttpStatus.OK, navResults.payload, navResults.gpsTime);
 	}
 }
 

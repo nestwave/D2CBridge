@@ -22,22 +22,30 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.springframework.http.HttpStatus;
 
+import static com.nestwave.device.util.GpsTime.getGpsTime;
 import static java.lang.String.format;
 
 @Slf4j
 public class GnssServiceResponse {
 	public final HttpStatus status;
 	public final byte[] message;
+	public final long gpsTime;
 
-	public GnssServiceResponse(HttpStatus status, byte[] message)
+	public GnssServiceResponse(HttpStatus status, byte[] message, long gpsTime)
 	{
 		this.status = status;
 		this.message = message;
+		this.gpsTime = gpsTime;
 	}
+
+	public GnssServiceResponse(HttpStatus status, byte[] message)
+	{
+		this(status, message, getGpsTime());
+	}
+
 	public GnssServiceResponse(HttpStatus status, String message){
-		this.status = status;
+		this(status, message.getBytes());
 		message = format("Rejected with code: %s.\n Error message: %s", status.toString(), message);
-		this.message = message.getBytes();
 		log.error(message);
 	}
 
