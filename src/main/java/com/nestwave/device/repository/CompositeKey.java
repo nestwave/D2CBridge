@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2022 - NESTWAVE SAS
+ * Copyright 2022 - NEXTNAV INC
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -16,70 +16,31 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
-package com.nestwave.device.repository.position;
+package com.nestwave.device.repository;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
-import com.nestwave.device.repository.CompositeKey;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.time.ZonedDateTime;
-
-import static java.lang.Math.sqrt;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Entity
-@Table(name = "positions")
-public class PositionRecord{
-	@EmbeddedId
-	CompositeKey key;
+@Embeddable
+public
+class CompositeKey implements Serializable{
+	@NotNull
+	@Column(name = "\"ID\"")
+	private long id;
 
 	@NotNull
-	private float confidence;
-
-	@NotNull
-	private float lon;
-
-	@NotNull
-	private float lat;
-
-	@NotNull
-	private float alt;
-
-	@NotNull
-	@Column(name = "\"Vx\"")
-	private float Vx;
-
-	@NotNull
-	@Column(name = "\"Vy\"")
-	private float Vy;
-
-	@NotNull
-	@Column(name = "\"Vz\"")
-	private float Vz;
-
-	public PositionRecord(long id, ZonedDateTime utcTime, float confidence, float lon, float lat, float alt, float Vx, float Vy, float Vz)
-	{
-		CompositeKey key = new CompositeKey(id, utcTime);
-		this.key = key;
-		this.lon = lon;
-		this.lat = lat;
-		this.alt = alt;
-		this.Vx = Vx;
-		this.Vy = Vy;
-		this.Vz = Vz;
-		this.confidence = confidence;
-	}
-
-	public double getSpeed()
-	{
-		return sqrt(Vx * Vx + Vy * Vy + Vz * Vz);
-	}
+	@Column(name = "\"utcTime\"")
+	private ZonedDateTime utcTime;
 }

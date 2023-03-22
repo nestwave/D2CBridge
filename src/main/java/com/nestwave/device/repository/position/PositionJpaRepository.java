@@ -18,6 +18,7 @@
  *****************************************************************************/
 package com.nestwave.device.repository.position;
 
+import com.nestwave.device.repository.CompositeKey;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
