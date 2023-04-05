@@ -25,12 +25,14 @@ public class TraxmateSubmitPositionParameters{
 	float latitude;
 	float longitude;
 	float accuracy;
+	Integer batteryLevel;
 	Object nswInfo;
 
-	public TraxmateSubmitPositionParameters(float[] position, float confidence, Object data){
+	public TraxmateSubmitPositionParameters(float[] position, float confidence, Integer batLevel, Object data){
 		longitude = position[0];
 		latitude = position[1];
 		accuracy = confidence;
+		batteryLevel = batLevel;
 		nswInfo = data;
 	}
 }

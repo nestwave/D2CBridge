@@ -40,8 +40,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 import static com.nestwave.device.util.GpsTime.getUtcAssistanceTime;
@@ -96,7 +94,13 @@ public class NavigationService extends GnssService{
 		}
 		navigationParameters = new NavigationParameters(payload);
 		ResponseEntity<GnssPositionResults> responseEntity = remoteApi(apiVer, api, navigationParameters, clientIpAddr, GnssPositionResults.class);
-		response = savePosition(apiVer, payload, responseEntity);
+		byte[] jsonResponse = serializeResponse(responseEntity);
+		if(jsonResponse == null){
+			response = new GnssServiceResponse(INTERNAL_SERVER_ERROR, "Cloud not serialize navigation results:\n" + responseEntity);
+		}else{
+			GnssPositionResults navResults = responseEntity.getBody();
+			response = savePosition(payload, navResults);
+		}
 		return response;
     }
 
@@ -119,6 +123,7 @@ public class NavigationService extends GnssService{
 		HybridNavigationParameters hybridNavigationParameters;
 		ResponseEntity<GnssPositionResults> responseEntity;
 		GnssServiceResponse response;
+		GnssPositionResults navResults = null;
 		String api = "locate";
 
 		try{
@@ -133,16 +138,21 @@ public class NavigationService extends GnssService{
 			log.error("Error when processing JSON: {}", e.getMessage());
 		}
 		responseEntity = remoteApi(apiVer, api, hybridNavigationParameters, clientIpAddr, GnssPositionResults.class);
-		response = savePosition(apiVer, payload, responseEntity);
-		if(response.status == OK){
-			ThinTrackPlatformStatusRecord[] thinTrackPlatformStatusRecords = ThinTrackPlatformStatusRecord.of(payload.deviceId, getUtcAssistanceTime(response.gpsTime), hybridNavPayload);
-			for(ThinTrackPlatformStatusRecord thinTrackPlatformStatusRecord : thinTrackPlatformStatusRecords){
-				log.info("ThinkTrack platform status: {}", thinTrackPlatformStatusRecord);
-				if(thinTrackPlatformStatusRecord != null){
-					thintrackPlatformStatusRepository.insertNewRecord(thinTrackPlatformStatusRecord);
-				}
+		byte[] jsonResponse = serializeResponse(responseEntity);
+		if(jsonResponse == null){
+			return new GnssServiceResponse(INTERNAL_SERVER_ERROR, "Cloud not serialize navigation results:\n" + responseEntity);
+		}
+		navResults = responseEntity.getBody();
+		ThinTrackPlatformStatusRecord[] thinTrackPlatformStatusRecords = ThinTrackPlatformStatusRecord.of(payload.deviceId, navResults.utcTime, hybridNavPayload);
+		for(ThinTrackPlatformStatusRecord thinTrackPlatformStatusRecord : thinTrackPlatformStatusRecords){
+			log.info("ThinkTrack platform status: {}", thinTrackPlatformStatusRecord);
+			if(thinTrackPlatformStatusRecord != null){
+				thintrackPlatformStatusRepository.insertNewRecord(thinTrackPlatformStatusRecord);
 			}
-			response = new GnssServiceResponse(OK, hybridNavPayload.addTechno(responseEntity.getBody().technology, response.message));
+		}
+		response = savePosition(payload, navResults);
+		if(response.status == OK){
+			response = new GnssServiceResponse(OK, hybridNavPayload.addTechno(navResults.technology, response.message));
 		}
 		return response;
 	}
@@ -169,27 +179,19 @@ public class NavigationService extends GnssService{
 		return new GnssServiceResponse(HttpStatus.OK, csv.getBytes());
 	}
 
-	public GnssServiceResponse savePosition(String apiVer, Payload payload, ResponseEntity<GnssPositionResults> responseEntity){
+	public GnssServiceResponse savePosition(Payload payload, GnssPositionResults navResults){
 		GnssServiceResponse response;
-		GnssPositionResults gnssPositionResults = responseEntity.getBody();
 		int customerId = payload.customerId();
 		long deviceId = payload.deviceId;
 
 		if(deviceId == 0){
-			return new GnssServiceResponse(responseEntity.getStatusCode(), gnssPositionResults.payload);
-		}
-		try{
-			response = new GnssServiceResponse(responseEntity.getStatusCode(), objectMapper.writeValueAsBytes(gnssPositionResults));
-		}catch(JsonProcessingException e){
-			log.error("Error when processing JSON: {}", e.getMessage());
-			response = new GnssServiceResponse(INTERNAL_SERVER_ERROR, "Cloud not serialize navigation results:\n" + gnssPositionResults);
-		}
-		if(response.status == HttpStatus.OK){
-			response = savePositionIntoDatabase(apiVer, payload.deviceId, response.message);
+			response = new GnssServiceResponse(OK, navResults.payload);
+		}else{
+			response = savePositionIntoDatabase(payload.deviceId, navResults);
 			for(PartnerService service : partnerServices){
 				GnssServiceResponse resp;
 				try{
-					resp = service.onGnssPosition(customerId, deviceId, gnssPositionResults);
+					resp = service.onGnssPosition(customerId, deviceId, navResults);
 					log.info("Partner's service {} returned status {} and content {}.", service.getClass().getName(), resp.status, new String(resp.message));
 				}catch(RestClientException e){
 					log.error("Unexpected partner server error:\n{}", e.getMessage());
@@ -198,25 +200,29 @@ public class NavigationService extends GnssService{
 		}
 		return response;
 	}
-	public GnssServiceResponse savePositionIntoDatabase(String apiVer, long deviceId, byte[] json){
-		log.info("Decoded position:\n{}", new String(json));
-		GnssPositionResults navResults;
-		ZonedDateTime gpsTime;
 
-		try{
-			navResults = objectMapper.readValue(json, GnssPositionResults.class);
-		}catch(IOException e){
-			log.error("Error parsing json : {}", e.getMessage());
-			return new GnssServiceResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Parsing position failed");
-		}
-		log.info("gpsTime = {}", navResults.gpsTime);
-		PositionRecord positionRecord = new PositionRecord(deviceId, getUtcAssistanceTime(navResults.gpsTime),
+	public GnssServiceResponse savePositionIntoDatabase(long deviceId, GnssPositionResults navResults){
+		PositionRecord positionRecord = new PositionRecord(deviceId, navResults.utcTime,
 				navResults.confidence,
 				navResults.position[0], navResults.position[1], navResults.position[2],
 				navResults.velocity[0], navResults.velocity[1], navResults.velocity[2]);
+
 		positionRepository.insertNavigationRecord(positionRecord);
 		log.info("New position inserted in positions database.");
 		return new GnssServiceResponse(HttpStatus.OK, navResults.payload, navResults.gpsTime);
+	}
+
+	<T> byte[] serializeResponse(ResponseEntity<T> responseEntity){
+		byte[] jsonResponse;
+		T body = responseEntity.getBody();
+
+		try{
+			jsonResponse = objectMapper.writeValueAsBytes(body);
+		}catch(JsonProcessingException e){
+			log.error("Error when processing JSON: {}", e.getMessage());
+			jsonResponse = null;
+		}
+		return jsonResponse;
 	}
 }
 

@@ -99,7 +99,12 @@ public class TraxmateService implements PartnerService{
 	public GnssServiceResponse onGnssPosition(int customerId, long deviceId, GnssPositionResults gnssPositionResults){
 		float[] position = gnssPositionResults.position;
 		float confidence = gnssPositionResults.confidence;
-		TraxmateSubmitPositionParameters data = new TraxmateSubmitPositionParameters(position, confidence, gnssPositionResults);
+		Integer batLevel = null;
+
+		if(gnssPositionResults.thintrackPlatformStatus != null){
+			batLevel = gnssPositionResults.thintrackPlatformStatus.getBatteryChargeLevel();
+		}
+		TraxmateSubmitPositionParameters data = new TraxmateSubmitPositionParameters(position, confidence, batLevel, gnssPositionResults);
 
 		return submitPosition(customerId, deviceId, data);
 	}

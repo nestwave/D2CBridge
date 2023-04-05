@@ -18,7 +18,13 @@
  *****************************************************************************/
 package com.nestwave.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.nestwave.device.repository.thintrack.ThinTrackPlatformStatusRecord;
+
+import java.time.ZonedDateTime;
+
 public class GnssPositionResults{
+	public ZonedDateTime utcTime;
 	public int gpsTime;
 	public float confidence;
 	public float[] position;
@@ -26,6 +32,7 @@ public class GnssPositionResults{
 	public GpsMeasurements gps;
 	public byte[] payload;
 	public String technology;
+	public ThinTrackPlatformStatusRecord thintrackPlatformStatus;
 }
 
 class GpsMeasurements{
