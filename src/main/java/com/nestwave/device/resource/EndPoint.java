@@ -30,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import static java.lang.String.format;
 import static org.apache.tomcat.util.codec.binary.Base64.encodeBase64String;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 @Slf4j
 public class EndPoint{
@@ -98,6 +99,9 @@ public class EndPoint{
 		}
 		strPayload = encodeBase64String(payload.content);
 		log.info("deviceId = {}, chkWord = {}, rawResults = \"{}\"", payload.deviceId, payload.chkWord, strPayload);
+		if(!payload.isValid){
+			return new GnssServiceResponse(UNPROCESSABLE_ENTITY, format("Payload integrity check failed!"));
+		}
 		response = assistanceService.remoteApi(apiVer,  "gnssAssistance", reqPayload, clientIpAddr);
 		return response;
 	}
@@ -115,6 +119,9 @@ public class EndPoint{
 		}
 		strPayload = encodeBase64String(payload.content);
 		log.info("deviceId = {}, chkWord = {}, rawResults = \"{}\"", payload.deviceId, payload.chkWord, strPayload);
+		if(!payload.isValid){
+			return new GnssServiceResponse(UNPROCESSABLE_ENTITY, format("Payload integrity check failed!"));
+		}
 		response = navigationService.gnssPosition(apiVer, reqPayload, clientIpAddr, noc);
 		return response;
 	}
@@ -155,6 +162,9 @@ public class EndPoint{
 		}
 		strPayload = encodeBase64String(payload.content);
 		log.info("deviceId = {}, chkWord = {}, payload = \"{}\"", payload.deviceId, payload.chkWord, strPayload);
+		if(!payload.isValid){
+			return new GnssServiceResponse(UNPROCESSABLE_ENTITY, format("Payload integrity check failed!"));
+		}
 		if(payload.deviceId == 0){
 			return new GnssServiceResponse(UNAUTHORIZED, "Invalid device ID");
 		}
