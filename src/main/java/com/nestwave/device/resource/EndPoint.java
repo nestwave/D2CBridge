@@ -85,6 +85,23 @@ public class EndPoint{
 		}
 	}
 
+	public GnssServiceResponse gnssAssistance(@NonNull String apiVer, byte [] reqPayload, String clientIpAddr){
+		Payload payload;
+		GnssServiceResponse response;
+		String strPayload;
+
+		log.info("Request from IP: {}, API: /{}/gnssAsssitance, reqPayload = {}", clientIpAddr, apiVer, encodeBase64String(reqPayload));
+		if(apiVer.compareTo("v1.7") < 0){
+			payload = new Payload(reqPayload, 4);
+		}else{
+			payload = new Payload(reqPayload);
+		}
+		strPayload = encodeBase64String(payload.content);
+		log.info("deviceId = {}, chkWord = {}, rawResults = \"{}\"", payload.deviceId, payload.chkWord, strPayload);
+		response = assistanceService.remoteApi(apiVer,  "gnssAssistance", reqPayload, clientIpAddr);
+		return response;
+	}
+
 	public GnssServiceResponse gnssPosition(@NonNull String apiVer, byte [] reqPayload, String clientIpAddr, boolean noc){
 		Payload payload;
 		GnssServiceResponse response;

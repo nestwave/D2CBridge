@@ -96,7 +96,7 @@ public class AssistanceResource extends EndPoint{
 	                                            HttpServletRequest request) {
 		GnssServiceResponse response;
 
-		response = assistanceService.remoteApi(apiVer,  "gnssAssistance", assistanceParams, getClientIpAddr(request));
+		response = gnssAssistance(apiVer, assistanceParams, getClientIpAddr(request));
 		return buildResponse(response);
 	}
 }

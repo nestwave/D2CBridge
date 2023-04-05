@@ -18,6 +18,7 @@
  *****************************************************************************/
 package com.nestwave.device.coap.resource;
 
+import com.nestwave.device.resource.EndPoint;
 import com.nestwave.device.service.AssistanceService;
 import com.nestwave.device.service.GnssServiceResponse;
 import com.nestwave.device.util.ApiUtil;
@@ -38,12 +39,11 @@ import static org.eclipse.californium.core.coap.MediaTypeRegistry.APPLICATION_OC
 
 @Slf4j
 @Component
-public class CoapAssistanceResource {
-    private final AssistanceService assistanceService;
+public class CoapAssistanceResource extends EndPoint{
     private final RestTemplate restTemplate;
 
     public CoapAssistanceResource(AssistanceService assistanceService, RestTemplate restTemplate) {
-        this.assistanceService = assistanceService;
+        super(assistanceService);
         this.restTemplate = restTemplate;
     }
 
@@ -110,7 +110,7 @@ public class CoapAssistanceResource {
         	byte [] assistanceParams = exchange.getRequestPayload();
 			GnssServiceResponse response;
 
-			response = assistanceService.remoteApi(apiVer, "gnssAssistance", assistanceParams, getClientIpAddr(exchange));
+			response = gnssAssistance(apiVer, assistanceParams, getClientIpAddr(exchange));
 			exchange.respond(response.getCoapStatus(), response.message, APPLICATION_OCTET_STREAM);
 		}
 	}
