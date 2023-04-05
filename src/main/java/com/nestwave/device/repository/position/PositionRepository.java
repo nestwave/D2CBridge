@@ -23,6 +23,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import static com.nestwave.device.repository.position.PositionRecord.positionDisplayColumns;
 import static java.lang.String.format;
 import static java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME;
 
@@ -58,7 +59,7 @@ public class PositionRepository{
 		StringBuilder csv = new StringBuilder();
 		List<PositionRecord> positions = findAllPositionRecordsById(id);
 
-		csv.append("Longitude[°],Latitude[°],Altitude[m],Speed[m/s],Confidence[m],Date & Time\n");
+		csv.append(positionDisplayColumns + "\n");
 		for(PositionRecord position : positions){
 			csv.append(format("%f,%f,%f,%f,%f,%s\n", position.getLon(), position.getLat(), position.getAlt(),
 					position.getSpeed(), position.getConfidence(),

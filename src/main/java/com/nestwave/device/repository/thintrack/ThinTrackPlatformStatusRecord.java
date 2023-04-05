@@ -45,6 +45,7 @@ import static java.lang.Byte.toUnsignedInt;
 public class ThinTrackPlatformStatusRecord{
 	static int size = 7; /* C struct size */
 	static int tag = 0xBEBE; /* uint16 ==> 2B */
+	public static String platformStatusDisplayColumns = "Ambient Temperature[°C],Battery Temperature[°C],Battery Level[%],Shock Count";
 
 	@EmbeddedId
 	CompositeKey key;

@@ -38,6 +38,7 @@ import static java.lang.Math.sqrt;
 @Entity
 @Table(name = "positions")
 public class PositionRecord{
+	public static String positionDisplayColumns = "Longitude[°],Latitude[°],Altitude[m],Speed[m/s],Confidence[m],Date & Time";
 	@EmbeddedId
 	CompositeKey key;
 

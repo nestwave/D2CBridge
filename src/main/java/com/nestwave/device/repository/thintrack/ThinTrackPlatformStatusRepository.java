@@ -24,6 +24,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import static com.nestwave.device.repository.position.PositionRecord.positionDisplayColumns;
+import static com.nestwave.device.repository.thintrack.ThinTrackPlatformStatusRecord.platformStatusDisplayColumns;
 import static java.lang.String.format;
 import static java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME;
 
@@ -60,9 +62,9 @@ public class ThinTrackPlatformStatusRepository{
 		List<ThinTrackPlatformStatusRecord> statusRecords = findAllRecordsById(id);
 
 		if(statusRecords.isEmpty()){
-			csv.append("Longitude[°],Latitude[°],Altitude[m],Speed[m/s],Confidence[m],Date & Time\n");
+			csv.append(positionDisplayColumns + "\n");
 		}else{
-			csv.append("Longitude[°],Latitude[°],Altitude[m],Speed[m/s],Confidence[m],Date & Time,Battery Temperature[°C],Ambient Temperature[°C],Battery Level[%],Shock Count\n");
+			csv.append(positionDisplayColumns + "," + platformStatusDisplayColumns + "\n");
 		}
 		for(PositionRecord position : positionRecords){
 			csv.append(format("%f,%f,%f,%f,%f,%s", position.getLon(), position.getLat(), position.getAlt(),
