@@ -119,18 +119,18 @@ function setDeviceId()
 	}
 }
 
-function refreshPage()
+function refreshPage(drop=false)
 {
 	const login = 'toto'; //document.getElementById('login').value;
 	var http = new XMLHttpRequest();
-	var url = dirname(document.URL) + '/gnssDevicePositionsGet';
+	var url = dirname(document.URL) + '/gnssDevicePositions' + (drop ? 'Delete' : 'Get');
 	var parameters = new URLSearchParams({
 		'deviceId': deviceId,
 		'login': login,
 	});
 	var maxVisibleMarkersQty = document.getElementById('nbVisiblePoints').value;
 
-	if(deviceId <= 0){
+	if(deviceId <= 0 || (drop && !confirm('Are you sure you want to drop all records of deviceId ' + deviceId + '?'))){
 		return;
 	}
 	http.responseType = 'text';

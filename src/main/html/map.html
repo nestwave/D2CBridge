@@ -23,14 +23,19 @@
 				<tbody>
 					<tr>
 						<td><label for='mapCenter'>Lon, Lat:</label></td>
-						<td><input type='text' min=-90 max=90 value='2.3469252,48.8616948' id='mapCenter' maxlength=13 size=10 onchange='setMapCenter();'></td>
-					</tr>
-						<td><label for='lon'>Nb Points:</label></td>
-						<td><input type='text' min=0 value='Infinity' id='nbVisiblePoints' maxlength=13 size=5>/<input type='text' min=0 value='0' id='nbPoints' maxlength=13 size=3 disabled></td>
-					</tr>
+						<td><input type='text' min=-90 max=90 value='2.3469252,48.8616948' id='mapCenter' maxlength=13 size=12 onchange='setMapCenter();'></td>
 					</tr>
 						<td><label for='deviceId'>Device ID:</label></td>
-						<td><input type='text' value='0' id='deviceId' maxlength=13 size=10 onchange='setDeviceId();'></td>
+						<td><input type='text' value='0' id='deviceId' maxlength=15 size=12 onchange='setDeviceId();'></td>
+					</tr>
+					</tr>
+						<td><label for='lon'>Nb Points:</label></td>
+						<td><input type='text' min=0 value='Infinity' id='nbVisiblePoints' maxlength=13 size=5>/<input type='text' min=0 value='0' id='nbPoints' maxlength=13 size=5 disabled></td>
+					</tr>
+					<tr>
+						<td align='center' colspan=2>
+							<button onClick='refreshPage(true)'>Drop stored data</button>
+						</td>
 					</tr>
 				</tbody>
 				</tbody>
