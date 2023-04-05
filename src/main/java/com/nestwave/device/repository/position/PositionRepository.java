@@ -60,7 +60,7 @@ public class PositionRepository{
 
 		csv.append("Longitude[°],Latitude[°],Altitude[m],Speed[m/s],Confidence[m],Date & Time\n");
 		for(PositionRecord position : positions){
-			csv.append(format("%f,%f,%f,%f, %f,%s\n", position.getLon(), position.getLat(), position.getAlt(),
+			csv.append(format("%f,%f,%f,%f,%f,%s\n", position.getLon(), position.getLat(), position.getAlt(),
 					position.getSpeed(), position.getConfidence(),
 					position.getKey().getUtcTime().format(ISO_ZONED_DATE_TIME)
 			));

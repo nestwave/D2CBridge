@@ -18,6 +18,7 @@
  *****************************************************************************/
 package com.nestwave.device.repository.thintrack;
 
+import com.nestwave.device.repository.position.PositionRecord;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -45,25 +46,37 @@ public class ThinTrackPlatformStatusRepository{
 		return thintrackPlatformStatusRecord;
 	}
 
-	public List<ThinTrackPlatformStatusRecord> findAllPositionRecordsById(long id)
+	public List<ThinTrackPlatformStatusRecord> findAllRecordsById(long id)
 	{
 		return thintrackPlatformStatusJpaRepository.findAllByKeyIdOrderByKeyUtcTimeAsc(id);
 	}
 
-	public void dropAllPositionRecordsWithId(long id){
+	public void dropAllRecordsWithId(long id){
 		thintrackPlatformStatusJpaRepository.deleteByKeyId(id);
 	}
 
-	public String getAllPositionRecordsWithId(long id){
+	public String getAllRecordsWithId(long id, List<PositionRecord> positionRecords){
 		StringBuilder csv = new StringBuilder();
-		List<ThinTrackPlatformStatusRecord> positions = findAllPositionRecordsById(id);
+		List<ThinTrackPlatformStatusRecord> statusRecords = findAllRecordsById(id);
 
-		csv.append("Longitude[°],Latitude[°],Altitude[m],Speed[m/s],Confidence[m],Date & Time\n");
-		for(ThinTrackPlatformStatusRecord statusRecord : positions){
-			csv.append(format("%d,%d,%d,%d,%s\n", statusRecord.ambientTemperature, statusRecord.batteryTemperature,
-					statusRecord.batteryChargeLevel, statusRecord.shocksCount,
-					statusRecord.getKey().getUtcTime().format(ISO_ZONED_DATE_TIME)
+		if(statusRecords.isEmpty()){
+			csv.append("Longitude[°],Latitude[°],Altitude[m],Speed[m/s],Confidence[m],Date & Time\n");
+		}else{
+			csv.append("Longitude[°],Latitude[°],Altitude[m],Speed[m/s],Confidence[m],Date & Time,Battery Temperature[°C],Ambient Temperature[°C],Battery Level[%],Shock Count\n");
+		}
+		for(PositionRecord position : positionRecords){
+			csv.append(format("%f,%f,%f,%f,%f,%s", position.getLon(), position.getLat(), position.getAlt(),
+					position.getSpeed(), position.getConfidence(),
+					position.getKey().getUtcTime().format(ISO_ZONED_DATE_TIME)
 			));
+			for(ThinTrackPlatformStatusRecord statusRecord : statusRecords){
+				if(position.getKey().equals(statusRecord.getKey())){
+					csv.append(format(",%d,%d,%d,%d", statusRecord.ambientTemperature, statusRecord.batteryTemperature,
+							statusRecord.batteryChargeLevel, statusRecord.shocksCount
+					));
+				}
+			}
+			csv.append('\n');
 		}
 		return csv.toString();
 	}

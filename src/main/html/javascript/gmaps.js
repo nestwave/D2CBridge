@@ -123,7 +123,7 @@ function refreshPage()
 {
 	const login = 'toto'; //document.getElementById('login').value;
 	var http = new XMLHttpRequest();
-	var url = dirname(document.URL) + '/v1.5/gnssDevicePositionsGet';
+	var url = dirname(document.URL) + '/gnssDevicePositionsGet';
 	var parameters = new URLSearchParams({
 		'deviceId': deviceId,
 		'login': login,

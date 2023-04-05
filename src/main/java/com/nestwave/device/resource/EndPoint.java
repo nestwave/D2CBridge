@@ -110,9 +110,16 @@ public class EndPoint{
 			log.error("Rejected due to missing mandatory parameter deviceId");
 			response = new GnssServiceResponse(HttpStatus.EXPECTATION_FAILED, "Please supply a deviceId parameter.");
 		}else{
-			response = navigationService.retrievePositionsFromDatabase(deviceId);
+			if(apiVer.compareTo("v1.8") > 0){
+				response = navigationService.retrievePositionsAndPlatofrmStatusFromDatabase(deviceId);
+			}else{
+				response = navigationService.retrievePositionsFromDatabase(deviceId);
+			}
 			if(drop){
 				navigationService.dropPositionsFromDatabase(deviceId);
+				if(apiVer.compareTo("v1.8") > 0){
+					navigationService.dropPlatformStatusFromDatabase(deviceId);
+				}
 			}
 		}
 		return response;

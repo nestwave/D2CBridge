@@ -42,6 +42,7 @@ import org.springframework.web.client.RestTemplate;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import static com.nestwave.device.util.GpsTime.getUtcAssistanceTime;
 import static java.util.Arrays.copyOf;
@@ -101,8 +102,15 @@ public class NavigationService extends GnssService{
 
 	public GnssServiceResponse dropPositionsFromDatabase(long deviceId)
 	{
-		log.info("Drop all positions for deviceId = {}", deviceId);
+		log.debug("Drop all positions for deviceId = {}", deviceId);
 		positionRepository.dropAllPositionRecordsWithId(deviceId);
+		return new GnssServiceResponse(HttpStatus.OK, (byte[])null);
+	}
+
+	public GnssServiceResponse dropPlatformStatusFromDatabase(long deviceId)
+	{
+		log.debug("Drop all platform status records for deviceId = {}", deviceId);
+		thintrackPlatformStatusRepository.dropAllRecordsWithId(deviceId);
 		return new GnssServiceResponse(HttpStatus.OK, (byte[])null);
 	}
 
@@ -145,6 +153,19 @@ public class NavigationService extends GnssService{
 
 		log.debug("Query all positions for deviceId = {}", deviceId);
 		csv = positionRepository.getAllPositionRecordsWithId(deviceId);
+		return new GnssServiceResponse(HttpStatus.OK, csv.getBytes());
+	}
+
+	public GnssServiceResponse retrievePositionsAndPlatofrmStatusFromDatabase(long deviceId)
+	{
+		String csv;
+		List<PositionRecord> positionRecords = positionRepository.findAllPositionRecordsById(deviceId);
+
+		if(positionRecords.isEmpty()){
+			return retrievePositionsFromDatabase(deviceId);
+		}
+		log.debug("Query all positions and status records for deviceId = {}", deviceId);
+		csv = thintrackPlatformStatusRepository.getAllRecordsWithId(deviceId, positionRecords);
 		return new GnssServiceResponse(HttpStatus.OK, csv.getBytes());
 	}
 
