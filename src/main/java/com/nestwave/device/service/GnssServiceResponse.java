@@ -55,7 +55,15 @@ public class GnssServiceResponse {
 			case EXPECTATION_FAILED: return ResponseCode.BAD_OPTION;
 			case GONE: return ResponseCode.CHANGED;
 			case UPGRADE_REQUIRED: return ResponseCode.NOT_IMPLEMENTED;
-			default: return ResponseCode.INTERNAL_SERVER_ERROR;
+			default:{
+				ResponseCode responseCode = ResponseCode.valueOf(status.name());
+				if(responseCode != null){
+					return responseCode;
+				}else{
+					log.error("Cloud not map {} to a valid COAP error. Error 500 returned instead.", status);
+					return ResponseCode.INTERNAL_SERVER_ERROR;
+				}
+			}
 		}
 	}
 }
