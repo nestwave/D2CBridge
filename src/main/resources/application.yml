@@ -44,6 +44,28 @@ logging:
     file: "%d %p %c{1.} [%t] %m%n"
   file: app-device.log
 
+management:
+  server:
+    port: 8080
+    ssl:
+      enabled: false
+  endpoints:
+    web:
+      base-path: /
+      path-mapping:
+        health: probe
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      group:
+        alive:
+          include: livenessState
+        ready:
+          include: readinessState
+        started:
+          include: livenessState
+
 spring:
   jpa:
     database: POSTGRESQL
