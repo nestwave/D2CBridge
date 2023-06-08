@@ -29,6 +29,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -80,7 +81,18 @@ public abstract class GnssService {
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(uriBase + apiVer + "/" + api);
         uri = builder.toUriString();
         log.info("Request forwarded to: {}", uri);
-        responseEntity = restTemplate.postForEntity(uri, requestEntity, responseType);
+        responseEntity = null;
+        for (int P = 0; P<3; P++) {
+            try {
+                responseEntity = restTemplate.postForEntity(uri, requestEntity, responseType);
+                break;
+            } catch (ResourceAccessException e) {
+                log.error("{}", e.getMessage());
+                if(P==2){
+                    throw e;
+                }
+            }
+        }
         if(responseType == byte[].class){
             strResponse = encodeBase64String((byte[])responseEntity.getBody());
         }else{
