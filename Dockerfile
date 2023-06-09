@@ -9,4 +9,4 @@ COPY target/security security
 COPY start.sh .
 COPY ${JAR_FILE} appDevice.jar
 
-ENTRYPOINT ./start.sh
+ENTRYPOINT exec ./start.sh

@@ -22,7 +22,11 @@ while read ENV_VAR ; do
 	export ${ENV_VAR}
 done < security/sensitive-config.ini
 
-while true
+CONTINUE=true
+
+trap 'CONTINUE=false ; pkill -f appDevice.jar' SIGTERM
+
+while ${CONTINUE}
 do
 	echo "*******************************************************************"
 	echo "* Micro service Device was restarted on `date -Is` *"
