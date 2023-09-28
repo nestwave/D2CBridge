@@ -25,17 +25,20 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.time.ZonedDateTime;
 
-import static com.nestwave.device.util.GpsTime.getUtcAssistanceTime;
 import static java.lang.Byte.toUnsignedInt;
 
+@Slf4j
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -46,6 +49,7 @@ public class ThinTrackPlatformStatusRecord{
 	static int size = 7; /* C struct size */
 	static int tag = 0xBEBE; /* uint16 ==> 2B */
 	public static String platformStatusDisplayColumns = "Ambient Temperature[°C],Battery Temperature[°C],Battery Level[%],Shock Count";
+	static Class<?> subClasses[] = {ThinTrackPlatformStatusRecord.class, ThinTrackPlatformBarometerStatusRecord.class};
 
 	@EmbeddedId
 	CompositeKey key;
@@ -82,17 +86,34 @@ public class ThinTrackPlatformStatusRecord{
 		ThinTrackPlatformStatusRecord[] records;
 
 		for(byte[] data : dataList){
-			if(isValid(data)){
-				recordsCount += 1;
+			for(Class<?> classType: subClasses){
+				try{
+					if((boolean) classType.getDeclaredMethod("isValid", byte[].class).invoke(null, data)){
+						recordsCount += 1;
+					}
+				}catch(Exception e){
+					continue;
+				}
 			}
 		}
 		records = new ThinTrackPlatformStatusRecord[recordsCount];
 		recordsCount = 0;
 		for(byte[] data : dataList){
-			if(isValid(data)){
-				records[recordsCount++] = new ThinTrackPlatformStatusRecord(deviceId, gpsTime, data);
+			for(Class<?> classType: subClasses){
+				try{
+					if((boolean) classType.getDeclaredMethod("isValid", byte[].class).invoke(null, data)){
+						final Constructor<?> constructor = classType.getConstructor(long.class, ZonedDateTime.class, byte[].class);
+						records[recordsCount++] = (ThinTrackPlatformStatusRecord) constructor.newInstance(deviceId, gpsTime, data);
+					}
+				}catch(Exception e){
+					log.error("Could not decode User Data packet: '{}'", data);
+				}
 			}
 		}
 		return records;
+	}
+
+	public ThinTrackPlatformStatusRecord saveTo(ThinTrackPlatformStatusRepository thintrackPlatformStatusRepository){
+		return thintrackPlatformStatusRepository.insertNewRecord(this);
 	}
 }
