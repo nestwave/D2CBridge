@@ -46,7 +46,7 @@ logging:
 
 management:
   server:
-    port: 8080
+    # port: 8080 # enable this for separating service and management ports
     ssl:
       enabled: false
   endpoints:
