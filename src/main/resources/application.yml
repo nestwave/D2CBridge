@@ -132,3 +132,7 @@ partners:
     token: ${TRAXMATE_TOKEN:} # Service will be disabled if no token is passed
     api:
       submitPosition: /capture/service/${partners.traxmate.token}/device/@{deviceId}
+  pubnub:
+    publishKey: ${P3DVIEW_PUBLISH_KEY:}
+    subscribeKey: ${P3DVIEW_SUBSCRIBE_KEY:}
+    channel: gb

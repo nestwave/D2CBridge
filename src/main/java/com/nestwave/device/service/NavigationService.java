@@ -61,7 +61,7 @@ public class NavigationService extends GnssService{
 		super(jwtTokenUtil, uri, restTemplate, objectMapper);
 		this.positionRepository = positionRepository;
 		this.thintrackPlatformStatusRepository = thintrackPlatformStatusRepository;
-	partnerServices = new PartnerService[0];
+		partnerServices = new PartnerService[0];
   }
 
 	public boolean supports(String apiVer){

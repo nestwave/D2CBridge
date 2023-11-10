@@ -28,7 +28,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-@ComponentScan(basePackages={"com.nestwave", "com.traxmate"})
+@ComponentScan(basePackages={"com.nestwave", "com.traxmate", "com.pubnub"})
 public class DeviceConfig {
 
   private static final int TIMEOUT = 20000;

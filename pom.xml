@@ -123,6 +123,11 @@
 			<artifactId>httpclient</artifactId>
 			<version>4.5.12</version>
 		</dependency>
+		<dependency>
+			<groupId>com.pubnub</groupId>
+			<artifactId>pubnub-gson</artifactId>
+			<version>6.3.4</version>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>

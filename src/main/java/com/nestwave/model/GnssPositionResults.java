@@ -28,6 +28,7 @@ public class GnssPositionResults{
 	public int gpsTime;
 	public float confidence;
 	public float[] position;
+	public float HeightAboveTerrain;
 	public float[] velocity;
 	public GpsMeasurements gps;
 	public byte[] payload;
