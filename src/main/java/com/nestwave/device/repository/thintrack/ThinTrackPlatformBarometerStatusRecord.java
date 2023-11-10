@@ -1,5 +1,6 @@
 package com.nestwave.device.repository.thintrack;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.persistence.*;
 import java.nio.ByteBuffer;
 import java.time.ZonedDateTime;
@@ -16,21 +17,27 @@ public class ThinTrackPlatformBarometerStatusRecord extends ThinTrackPlatformSta
 	public static String platformStatusDisplayColumns = ThinTrackPlatformStatusRecord.platformStatusDisplayColumns +
 			",Baro Meas Count, Baro Meas Average, Baro Meas Variance, Baro Meas Minimum, Baro Maximum";
 
+	@JsonProperty("count")
 	@Column(name = "\"barometerMeasurementsCount\"")
 	int barometerMeasurementsCount; /* uint8 ==> 1B */
 
+	@JsonProperty("average")
 	@Column(name = "\"barometerMeasurementsAverage\"")
 	float barometerMeasurementsAverage; /* float ==> 4B */
 
+	@JsonProperty("variance")
 	@Column(name = "\"barometerMeasurementsVariance\"")
 	float barometerMeasurementsVariance; /* float ==> 4B */
 
+	@JsonProperty("min")
 	@Column(name = "\"barometerMeasurementsMin\"")
 	float barometerMeasurementsMin; /* float ==> 4B */
 
+	@JsonProperty("max")
 	@Column(name = "\"barometerMeasurementsMax\"")
 	float barometerMeasurementsMax; /* float ==> 4B */
 
+	@JsonProperty("temperature")
 	@Column(name = "\"barometerTemperature\"")
 	float barometerMeasurementsTemperature; /* float ==> 4B */
 

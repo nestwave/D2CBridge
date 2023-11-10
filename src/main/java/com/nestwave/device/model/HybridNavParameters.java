@@ -1,5 +1,7 @@
 package com.nestwave.device.model;
 
+import com.nestwave.device.repository.thintrack.ThinTrackPlatformBarometerStatusRecord;
+import com.nestwave.device.repository.thintrack.ThinTrackPlatformStatusRecord;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -21,7 +23,10 @@ public class HybridNavParameters{
 	@Schema(description = "Bluetooth cell information data as sent by the Iot device")
 	public SingleBluetoothInfo[] bluetoothBeacons;
 
-	public HybridNavParameters(HybridNavPayload hybridNavigationPayload){
+	@Schema(description= "Pressure information data as sent by the Iot device")
+	public ThinTrackPlatformStatusRecord pressure;
+
+	public HybridNavParameters(HybridNavPayload hybridNavigationPayload, ThinTrackPlatformStatusRecord[] thinTrackPlatformStatusRecords){
 		for(HybridNavMessage message : hybridNavigationPayload.messages){
 			if(message instanceof CellInfo){
 				this.radioType = "LTE";
@@ -30,6 +35,14 @@ public class HybridNavParameters{
 				this.wifiAccessPoints = ((WifiInfo) message).wifiInfo;
 			}else if(message instanceof BluetoothInfo){
 				this.bluetoothBeacons = ((BluetoothInfo) message).bluetoothInfo;
+			}
+		}
+		if(thinTrackPlatformStatusRecords != null){
+			for(ThinTrackPlatformStatusRecord thinTrackPlatformStatusRecord : thinTrackPlatformStatusRecords){
+				if(thinTrackPlatformStatusRecord instanceof ThinTrackPlatformBarometerStatusRecord){
+					this.pressure = thinTrackPlatformStatusRecord;
+					break;
+				}
 			}
 		}
 	}

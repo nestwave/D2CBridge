@@ -18,6 +18,7 @@
  *****************************************************************************/
 package com.nestwave.device.repository.thintrack;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nestwave.device.model.HybridNavPayload;
 
 import com.nestwave.device.repository.CompositeKey;
@@ -33,7 +34,6 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.time.ZonedDateTime;
 
 import static java.lang.Byte.toUnsignedInt;
@@ -51,23 +51,30 @@ public class ThinTrackPlatformStatusRecord{
 	public static String platformStatusDisplayColumns = "Ambient Temperature[°C],Battery Temperature[°C],Battery Level[%],Shock Count";
 	static Class<?> subClasses[] = {ThinTrackPlatformStatusRecord.class, ThinTrackPlatformBarometerStatusRecord.class};
 
+	@JsonIgnore
 	@EmbeddedId
 	CompositeKey key;
 
+	@JsonIgnore
 	@Column(name = "\"batteryTemperature\"")
 	int batteryTemperature; /* int8 ==> 1B */
 
+	@JsonIgnore
 	@Column(name = "\"ambientTemperature\"")
 	int ambientTemperature; /* int8 ==> 1B */
 
+	@JsonIgnore
 	@Column(name = "\"batteryChargeLevel\"")
 	int batteryChargeLevel; /* int8 ==> 1B */
 
+	@JsonIgnore
 	@Column(name = "\"shocksCount\"")
 	int shocksCount; /* uint16 ==> 2B */
 
 	public ThinTrackPlatformStatusRecord(long deviceId, ZonedDateTime utcTime, byte[] data){
-		key = new CompositeKey(deviceId, utcTime);
+		if(utcTime != null){
+			key = new CompositeKey(deviceId, utcTime);
+		}
 		batteryTemperature = data[2];
 		ambientTemperature = data[3];
 		batteryChargeLevel = data[4];
@@ -115,5 +122,9 @@ public class ThinTrackPlatformStatusRecord{
 
 	public ThinTrackPlatformStatusRecord saveTo(ThinTrackPlatformStatusRepository thintrackPlatformStatusRepository){
 		return thintrackPlatformStatusRepository.insertNewRecord(this);
+	}
+
+	public void setKey(long deviceId, ZonedDateTime utcTime){
+		key = new CompositeKey(deviceId, utcTime);
 	}
 }

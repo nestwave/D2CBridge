@@ -42,7 +42,6 @@ import org.springframework.web.client.RestTemplate;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-import static com.nestwave.device.util.GpsTime.getUtcAssistanceTime;
 import static java.util.Arrays.copyOf;
 import static org.springframework.http.HttpStatus.*;
 
@@ -131,7 +130,8 @@ public class NavigationService extends GnssService{
 		}catch(InvalidHybridNavPayloadException e){
 			return new GnssServiceResponse(NOT_ACCEPTABLE, e.getMessage());
 		}
-		hybridNavigationParameters = new HybridNavigationParameters(payload, hybridNavPayload);
+		ThinTrackPlatformStatusRecord[] thinTrackPlatformStatusRecords = ThinTrackPlatformStatusRecord.of(payload.deviceId, null, hybridNavPayload);
+		hybridNavigationParameters = new HybridNavigationParameters(payload, hybridNavPayload, thinTrackPlatformStatusRecords);
 		try{
 			log.info("hybridNavigationParameters = {}", objectMapper.writeValueAsString(hybridNavigationParameters));
 		}catch(Exception e){
@@ -143,8 +143,8 @@ public class NavigationService extends GnssService{
 			return new GnssServiceResponse(INTERNAL_SERVER_ERROR, "Cloud not serialize navigation results:\n" + responseEntity);
 		}
 		navResults = responseEntity.getBody();
-		ThinTrackPlatformStatusRecord[] thinTrackPlatformStatusRecords = ThinTrackPlatformStatusRecord.of(payload.deviceId, navResults.utcTime, hybridNavPayload);
 		for(ThinTrackPlatformStatusRecord thinTrackPlatformStatusRecord : thinTrackPlatformStatusRecords){
+			thinTrackPlatformStatusRecord.setKey(payload.deviceId, navResults.utcTime);
 			log.info("ThinkTrack platform status: {}", thinTrackPlatformStatusRecord);
 			if(thinTrackPlatformStatusRecord != null){
 				navResults.thintrackPlatformStatus = thinTrackPlatformStatusRecord.saveTo(thintrackPlatformStatusRepository);
@@ -244,10 +244,10 @@ class HybridNavigationParameters extends NavigationParameters{
 	@Schema(description = "Hybrid navigation data as expected by the third party services")
 	public HybridNavParameters hybrid;
 
-	public HybridNavigationParameters(Payload payload, HybridNavPayload hybridNavPayload){
+	public HybridNavigationParameters(Payload payload, HybridNavPayload hybridNavPayload, ThinTrackPlatformStatusRecord[] thinTrackPlatformStatusRecord){
 		super(payload);
 
 		rawMeas = hybridNavPayload.rawMeas();
-		hybrid = new HybridNavParameters(hybridNavPayload);
+		hybrid = new HybridNavParameters(hybridNavPayload, thinTrackPlatformStatusRecord);
 	}
 }
