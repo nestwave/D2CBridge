@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nestwave.device.model.*;
 import com.nestwave.device.repository.position.PositionRecord;
 import com.nestwave.device.repository.position.PositionRepository;
+import com.nestwave.device.repository.thintrack.ThinTrackPlatformBarometerStatusRecord;
 import com.nestwave.device.repository.thintrack.ThinTrackPlatformStatusRecord;
 import com.nestwave.device.repository.thintrack.ThinTrackPlatformStatusRepository;
 import com.nestwave.device.util.JwtTokenUtil;
@@ -132,6 +133,10 @@ public class NavigationService extends GnssService{
 		}
 		ThinTrackPlatformStatusRecord[] thinTrackPlatformStatusRecords = ThinTrackPlatformStatusRecord.of(payload.deviceId, null, hybridNavPayload);
 		hybridNavigationParameters = new HybridNavigationParameters(payload, hybridNavPayload, thinTrackPlatformStatusRecords);
+		if(thinTrackPlatformStatusRecords instanceof ThinTrackPlatformBarometerStatusRecord[]){
+			String[] features = {"PAAN"};
+			hybridNavigationParameters.features = features;
+		}
 		try{
 			log.info("hybridNavigationParameters = {}", objectMapper.writeValueAsString(hybridNavigationParameters));
 		}catch(Exception e){
@@ -232,7 +237,7 @@ class NavigationParameters extends GnssServiceParameters{
 	@Schema(description = "GNSS raw measurements data as sent by the Iot device",
 			example = "AAAAAA4AAAA=", required = true)
 	public byte[] rawMeas;
-
+	public String[] features;
 	public NavigationParameters(Payload payload){
 		super(payload);
 		rawMeas = payload.content;
