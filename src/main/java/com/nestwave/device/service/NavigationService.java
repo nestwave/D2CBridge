@@ -133,9 +133,12 @@ public class NavigationService extends GnssService{
 		}
 		ThinTrackPlatformStatusRecord[] thinTrackPlatformStatusRecords = ThinTrackPlatformStatusRecord.of(payload.deviceId, null, hybridNavPayload);
 		hybridNavigationParameters = new HybridNavigationParameters(payload, hybridNavPayload, thinTrackPlatformStatusRecords);
-		if(thinTrackPlatformStatusRecords instanceof ThinTrackPlatformBarometerStatusRecord[]){
-			String[] features = {"PAAN"};
-			hybridNavigationParameters.features = features;
+		for(ThinTrackPlatformStatusRecord record : thinTrackPlatformStatusRecords){
+			if(record instanceof ThinTrackPlatformBarometerStatusRecord){
+				String[] features = {"PAAN"};
+				hybridNavigationParameters.features = features;
+				break;
+			}
 		}
 		try{
 			log.info("hybridNavigationParameters = {}", objectMapper.writeValueAsString(hybridNavigationParameters));
