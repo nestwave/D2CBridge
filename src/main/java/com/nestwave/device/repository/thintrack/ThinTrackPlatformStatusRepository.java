@@ -25,17 +25,19 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.nestwave.device.repository.position.PositionRecord.positionDisplayColumns;
-import static com.nestwave.device.repository.thintrack.ThinTrackPlatformStatusRecord.platformStatusDisplayColumns;
+import static com.nestwave.device.repository.thintrack.ThinTrackPlatformBarometerStatusRecord.platformStatusDisplayColumns;
 import static java.lang.String.format;
 import static java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME;
 
 @Repository
 public class ThinTrackPlatformStatusRepository{
 	private final ThinTrackPlatformStatusJpaRepository thintrackPlatformStatusJpaRepository;
+	private final ThinTrackPlatformBarometerStatusJpaRepository thintrackPlatformBarometerStatusJpaRepository;
 
-	public ThinTrackPlatformStatusRepository(ThinTrackPlatformStatusJpaRepository thintrackPlatformStatusJpaRepository)
+	public ThinTrackPlatformStatusRepository(ThinTrackPlatformStatusJpaRepository thintrackPlatformStatusJpaRepository, ThinTrackPlatformBarometerStatusJpaRepository thintrackPlatformBarometerStatusJpaRepository)
 	{
 		this.thintrackPlatformStatusJpaRepository = thintrackPlatformStatusJpaRepository;
+		this.thintrackPlatformBarometerStatusJpaRepository = thintrackPlatformBarometerStatusJpaRepository;
 	}
 
 	public ThinTrackPlatformStatusRecord insertNewRecord(ThinTrackPlatformStatusRecord thintrackPlatformStatusRecord)
@@ -48,9 +50,25 @@ public class ThinTrackPlatformStatusRepository{
 		return thintrackPlatformStatusRecord;
 	}
 
+	public ThinTrackPlatformBarometerStatusRecord insertNewRecord(ThinTrackPlatformBarometerStatusRecord thinTrackPlatformBarometerStatusRecord)
+	{
+		Optional<ThinTrackPlatformBarometerStatusRecord> oldPositionRecord = thintrackPlatformBarometerStatusJpaRepository.findByKey(thinTrackPlatformBarometerStatusRecord.getKey());
+		if(oldPositionRecord.isPresent()){
+			thintrackPlatformBarometerStatusJpaRepository.delete(oldPositionRecord.get());
+		}
+		thintrackPlatformBarometerStatusJpaRepository.save(thinTrackPlatformBarometerStatusRecord);
+		return thinTrackPlatformBarometerStatusRecord;
+	}
+
 	public List<ThinTrackPlatformStatusRecord> findAllRecordsById(long id)
 	{
 		return thintrackPlatformStatusJpaRepository.findAllByKeyIdOrderByKeyUtcTimeAsc(id);
+	}
+
+	public List<ThinTrackPlatformBarometerStatusRecord> findAllBaroRecordsById(long id)
+	{
+
+		return thintrackPlatformBarometerStatusJpaRepository.findAllByKeyIdOrderByKeyUtcTimeAsc(id);
 	}
 
 	public void dropAllRecordsWithId(long id){
@@ -60,6 +78,7 @@ public class ThinTrackPlatformStatusRepository{
 	public String getAllRecordsWithId(long id, List<PositionRecord> positionRecords){
 		StringBuilder csv = new StringBuilder();
 		List<ThinTrackPlatformStatusRecord> statusRecords = findAllRecordsById(id);
+		List<ThinTrackPlatformBarometerStatusRecord> baroRecords = findAllBaroRecordsById(id);
 
 		if(statusRecords.isEmpty()){
 			csv.append(positionDisplayColumns + "\n");
@@ -75,6 +94,13 @@ public class ThinTrackPlatformStatusRepository{
 				if(position.getKey().equals(statusRecord.getKey())){
 					csv.append(format(",%d,%d,%d,%d", statusRecord.ambientTemperature, statusRecord.batteryTemperature,
 							statusRecord.batteryChargeLevel, statusRecord.shocksCount
+					));
+				}
+			}
+			for(ThinTrackPlatformBarometerStatusRecord baroRecord:baroRecords){
+				if(position.getKey().equals(baroRecord.getKey())){
+					csv.append(format(",%d,%f,%f,%f,%f,%f", baroRecord.barometerMeasurementsCount, baroRecord.barometerMeasurementsAverage,
+							baroRecord.barometerMeasurementsVariance, baroRecord.barometerMeasurementsMin, baroRecord.barometerMeasurementsMax, baroRecord.barometerMeasurementsTemperature
 					));
 				}
 			}

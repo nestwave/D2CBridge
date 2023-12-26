@@ -5,4 +5,7 @@
    <changeSet id="platformStatusTableCreate" author="mazen">
         <sqlFile encoding="utf8" path="classpath:database/tracking/ThinTrack/platformStatusTableCreate.sql"/>
    </changeSet>
+    <changeSet id="baroStatusTableCreate" author="marwan">
+        <sqlFile encoding="utf8" path="classpath:database/tracking/ThinTrack/baroStatusTableCreate.sql"/>
+    </changeSet>
 </databaseChangeLog>

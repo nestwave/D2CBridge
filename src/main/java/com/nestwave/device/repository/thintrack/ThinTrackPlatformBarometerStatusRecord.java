@@ -1,6 +1,12 @@
 package com.nestwave.device.repository.thintrack;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import javax.persistence.*;
 import java.nio.ByteBuffer;
 import java.time.ZonedDateTime;
@@ -10,12 +16,17 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static java.util.Arrays.copyOfRange;
 import static org.springframework.beans.BeanUtils.copyProperties;
 
-//@Entity
+@Slf4j
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+@Entity
+@Table(name = "\"thintrackPlatformBarometerStatus\"")
 public class ThinTrackPlatformBarometerStatusRecord extends ThinTrackPlatformStatusRecord{
 	static int size = ThinTrackPlatformStatusRecord.size + 21; /* C struct size */
 	static int tag = 0xBEBF; /* uint16 ==> 2B */
 	public static String platformStatusDisplayColumns = ThinTrackPlatformStatusRecord.platformStatusDisplayColumns +
-			",Baro Meas Count, Baro Meas Average, Baro Meas Variance, Baro Meas Minimum, Baro Maximum";
+			",Baro Meas Count, Baro Meas Average[Pa], Baro Meas Variance, Baro Meas Minimum[Pa], Baro Meas Maximum[Pa], Baro Temperature[°C]";
 
 	@JsonProperty("count")
 	@Column(name = "\"barometerMeasurementsCount\"")
@@ -58,10 +69,4 @@ public class ThinTrackPlatformBarometerStatusRecord extends ThinTrackPlatformSta
 		return (size == data.length) && (tag == dataTag);
 	}
 
-	public ThinTrackPlatformStatusRecord saveTo(ThinTrackPlatformStatusRepository thintrackPlatformStatusRepository){
-		ThinTrackPlatformStatusRecord result = new ThinTrackPlatformStatusRecord();
-
-		copyProperties(this, result);
-		return result.saveTo(thintrackPlatformStatusRepository);
-	}
 }

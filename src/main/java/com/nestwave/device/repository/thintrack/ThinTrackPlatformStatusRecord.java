@@ -31,6 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 
 import java.lang.reflect.Constructor;
@@ -45,6 +47,7 @@ import static java.lang.Byte.toUnsignedInt;
 @Data
 @Entity
 @Table(name = "\"thintrackPlatformStatus\"")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class ThinTrackPlatformStatusRecord{
 	static int size = 7; /* C struct size */
 	static int tag = 0xBEBE; /* uint16 ==> 2B */
@@ -118,10 +121,6 @@ public class ThinTrackPlatformStatusRecord{
 			}
 		}
 		return records;
-	}
-
-	public ThinTrackPlatformStatusRecord saveTo(ThinTrackPlatformStatusRepository thintrackPlatformStatusRepository){
-		return thintrackPlatformStatusRepository.insertNewRecord(this);
 	}
 
 	public void setKey(long deviceId, ZonedDateTime utcTime){

@@ -155,7 +155,7 @@ public class NavigationService extends GnssService{
 			thinTrackPlatformStatusRecord.setKey(payload.deviceId, navResults.utcTime);
 			log.info("ThinkTrack platform status: {}", thinTrackPlatformStatusRecord);
 			if(thinTrackPlatformStatusRecord != null){
-				navResults.thintrackPlatformStatus = thinTrackPlatformStatusRecord.saveTo(thintrackPlatformStatusRepository);
+				navResults.thintrackPlatformStatus = thintrackPlatformStatusRepository.insertNewRecord(thinTrackPlatformStatusRecord);
 			}
 		}
 		response = savePosition(payload, navResults);
