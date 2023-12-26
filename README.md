@@ -179,7 +179,7 @@ services:
     depends_on:
       - tracking
     dns_search:
-      - nw.do
+      - nextnav.io
 
 networks:
   backend:
