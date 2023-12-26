@@ -195,8 +195,9 @@ docker-compose -f docker-compose-bridge.yml up -d --build
 
 ## Technical documentation
 Before you start working on D2CB, please ensure you have read
-- [NestCloud Bridge Specification V1.04](doc/NestCloud%20Bridge%20Specification%20v1.04.pdf) for API verzsion v1.7 and later.
-- [NestCloud Bridge Specification V1.03](doc/NestCloud%20Bridge%20Specification%20v1.03.pdf) for API verzsion v1.6 and prior. (This is legacy and shall not be used for new projects).
+- [NestCloud Bridge Specification V1.05](doc/NestCloud%20Bridge%20Specification%20v1.05.pdf) for API version v1.8 and later.
+- [NestCloud Bridge Specification V1.04](doc/NestCloud%20Bridge%20Specification%20v1.04.pdf) for API version v1.7 and later. (This is legacy and shall not be used for new projects).
+- [NestCloud Bridge Specification V1.03](doc/NestCloud%20Bridge%20Specification%20v1.03.pdf) for API version v1.6 and prior. (This is legacy and shall not be used for new projects).
 
 ### Positions tracking database
 The D2CB allows storing device positions in a DB in order provide them to a web frontend (an Apache based example is provided [here](src/main/html)).
