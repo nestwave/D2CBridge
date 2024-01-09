@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ###############################################################################
 # Copyright 2022 - NESTWAVE SAS
 #
@@ -29,7 +29,12 @@ trap 'CONTINUE=false ; pkill -f appDevice.jar' SIGTERM
 while ${CONTINUE}
 do
 	echo "*******************************************************************"
-	echo "* Micro service Device was restarted on `date -Is` *"
+	if ! pgrep -f appDevice.jar > /dev/null
+	then
+		java -jar appDevice.jar &
+		echo "* Micro service Device was restarted on `date -Is` *"
+	fi
 	echo "*******************************************************************"
-	java -jar appDevice.jar
+	# Wait for any of launched jobs to exit
+	wait -f -n
 done
