@@ -159,7 +159,7 @@ public class NavigationService extends GnssService{
 			}
 		}
 		response = savePosition(payload, navResults);
-		if(response.status == OK){
+		if(response.status == OK && response.message != null){
 			response = new GnssServiceResponse(OK, hybridNavPayload.addTechno(navResults.technology, response.message));
 		}
 		return response;
