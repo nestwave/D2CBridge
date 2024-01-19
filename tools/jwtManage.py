@@ -19,6 +19,15 @@
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
 
+'''
+This script retrieves a JWT. from NestCloud of by signing in using either
+a username and corresponding password or using an old but still valid JWT.
+
+This script is meant to be run by D2CB make file but can be executed by user
+as for example
+	$0 -u nsw-cloud@nestwave.com -o secret.jwt
+'''
+
 from getpass import getpass
 from nswpkg.tools.cli.lib import UtStatus, auto, exit
 from requests import post
@@ -75,7 +84,7 @@ if __name__ == '__main__':
 		# Suppress only the single warning from urllib3 needed.
 		disable_warnings(category=InsecureRequestWarning)
 	if op.hostname:
-		AUTH_URL = f'https://{op.hostname}:9443/authenticate'
+		AUTH_URL = f'https://{op.hostname}/authenticate'
 	if op.jwt:
 		token = jwtRenew(op.jwt, op.trust_ssl_certificate)
 	else:
