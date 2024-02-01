@@ -27,7 +27,6 @@ public class NNPViewService implements PartnerService {
     PNConfiguration pnConfiguration;
     final String publishKey;
     final String subscribeKey;
-    final String channel;
     PubNub pubnub;
     final Environment environment;
     final RestTemplate restTemplate;
@@ -38,11 +37,10 @@ public class NNPViewService implements PartnerService {
         this.environment = environment;
         this.publishKey = environment.getProperty("partners.pubnub.publishKey");
         this.subscribeKey = environment.getProperty("partners.pubnub.subscribeKey");
-        this.channel = environment.getProperty("partners.pubnub.channel");
         String userId = "myUniqueTempUserId";
 
-        if(isBlank(publishKey)||isBlank(subscribeKey)||isBlank(channel)){
-            log.info("Pubnub publish key or channel or userId is not configured.");
+        if(isBlank(publishKey)||isBlank(subscribeKey)){
+            log.info("Pubnub publish key or userId is not configured.");
             this.userId = null;
         }else {
             this.userId = new UserId(userId);
@@ -58,10 +56,17 @@ public class NNPViewService implements PartnerService {
             }
         }
     }
-    public GnssServiceResponse nNViewPublishPosition(NNPViewSubmitPositionParameters nNPViewSubmitPositionParameters){
+    public GnssServiceResponse nNViewPublishPosition(NNPViewSubmitPositionParameters nNPViewSubmitPositionParameters, int customerId){
         log.info("Informations sent to pubnub : {}", nNPViewSubmitPositionParameters.toString());
+        String channel;
+        if(customerId != 0){
+           channel = Integer.toString(customerId);
+        }else{
+            channel = environment.getProperty("partners.pubnub.channel");
+        }
+        log.info("Pubnub channel is :{}", channel);
         try{
-            PNPublishResult publishResponse = this.pubnub.publish().message(nNPViewSubmitPositionParameters).channel(this.channel).sync();
+            PNPublishResult publishResponse = this.pubnub.publish().message(nNPViewSubmitPositionParameters).channel(channel).sync();
             log.info("Response from pubnub is :{}", publishResponse.toString());
             return new GnssServiceResponse(OK, publishResponse.toString().getBytes());
         } catch (PubNubException e) {
@@ -75,7 +80,7 @@ public class NNPViewService implements PartnerService {
     public GnssServiceResponse onGnssPosition( int customerId, long deviceId, GnssPositionResults gnssPositionResults){
         pnConfiguration.setUserId(new UserId(customerId+"-"+deviceId));
         NNPViewSubmitPositionParameters data = new NNPViewSubmitPositionParameters("NextNav placeholder", "NextNav placeholder", gnssPositionResults.confidence, gnssPositionResults.position, gnssPositionResults.HeightAboveTerrain, true,gnssPositionResults.gpsTime);
-        return nNViewPublishPosition(data);
+        return nNViewPublishPosition(data, customerId);
     }
 
 }

@@ -191,7 +191,7 @@ public class NavigationService extends GnssService{
 		GnssServiceResponse response;
 		int customerId = payload.customerId();
 		long deviceId = payload.deviceId;
-
+		log.info("CustomerId is: {}", customerId);
 		if(deviceId == 0){
 			response = new GnssServiceResponse(OK, navResults.payload);
 		}else{
