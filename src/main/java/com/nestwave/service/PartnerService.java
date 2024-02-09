@@ -24,5 +24,5 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface PartnerService{
-	GnssServiceResponse onGnssPosition(int customerId, long deviceId, GnssPositionResults gnssPositionResults);
+	GnssServiceResponse onGnssPosition(int customerId, long deviceId, long IMEI, GnssPositionResults gnssPositionResults);
 }

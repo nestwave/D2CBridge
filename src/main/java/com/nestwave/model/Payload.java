@@ -112,7 +112,10 @@ public class Payload{
 	{
 		return isLegacy() ? customerId((int)deviceId) : (int)((deviceId >> 48) & 0xFFFFL);
 	}
-
+	public long IMEI()
+	{
+		return deviceId & 0x0000FFFFFFFFFFFFL;
+	}
 	public static int customerId(int deviceId){
 		final int classIndicator = deviceId & classMask;
 

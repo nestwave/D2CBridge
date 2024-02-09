@@ -79,7 +79,7 @@ public class TraxmateService implements PartnerService{
 		return new GnssServiceResponse(responseEntity.getStatusCode(), responseEntity.getBody());
 	}
 
-	public GnssServiceResponse submitPosition(int customerId, long deviceId, TraxmateSubmitPositionParameters data){
+	public GnssServiceResponse submitPosition(int customerId, long deviceId,TraxmateSubmitPositionParameters data){
 		final String api = environment.getProperty("partners.traxmate.api.submitPosition");
 
 		log.info("deviceId: {}, customerId: {}", deviceId, customerId);
@@ -96,7 +96,7 @@ public class TraxmateService implements PartnerService{
 	}
 
 	@Override
-	public GnssServiceResponse onGnssPosition(int customerId, long deviceId, GnssPositionResults gnssPositionResults){
+	public GnssServiceResponse onGnssPosition(int customerId, long deviceId, long IMEI, GnssPositionResults gnssPositionResults){
 		float[] position = gnssPositionResults.position;
 		float confidence = gnssPositionResults.confidence;
 		Integer batLevel = null;

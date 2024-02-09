@@ -190,8 +190,9 @@ public class NavigationService extends GnssService{
 	public GnssServiceResponse savePosition(Payload payload, GnssPositionResults navResults){
 		GnssServiceResponse response;
 		int customerId = payload.customerId();
+		long IMEI = payload.IMEI();
 		long deviceId = payload.deviceId;
-		log.info("CustomerId is: {}", customerId);
+		log.info("CustomerId is: {}.\nIMEI is: {}.\n Full deviceId is: {}.", customerId, IMEI, deviceId);
 		if(deviceId == 0){
 			response = new GnssServiceResponse(OK, navResults.payload);
 		}else{
@@ -199,7 +200,7 @@ public class NavigationService extends GnssService{
 			for(PartnerService service : partnerServices){
 				GnssServiceResponse resp;
 				try{
-					resp = service.onGnssPosition(customerId, deviceId, navResults);
+					resp = service.onGnssPosition(customerId, deviceId, IMEI, navResults);
 					log.info("Partner's service {} returned status {} and content {}.", service.getClass().getName(), resp.status, new String(resp.message));
 				}catch(RestClientException e){
 					log.error("Unexpected partner server error:\n{}", e.getMessage());
