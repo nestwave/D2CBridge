@@ -78,7 +78,7 @@ public class NNPViewService implements PartnerService {
     }
     @Override
     public GnssServiceResponse onGnssPosition( int customerId, long deviceId, long IMEI, GnssPositionResults gnssPositionResults){
-        pnConfiguration.setUserId(new UserId(Integer.toString(customerId)));
+        pnConfiguration.setUserId(new UserId(Long.toString(IMEI)));
         NNPViewSubmitPositionParameters data = new NNPViewSubmitPositionParameters(Long.toString(IMEI), Long.toString(deviceId), gnssPositionResults.confidence, gnssPositionResults.position, gnssPositionResults.HeightAboveTerrain, true,gnssPositionResults.gpsTime);
         return nNViewPublishPosition(data, customerId);
     }
