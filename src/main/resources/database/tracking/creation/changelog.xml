@@ -8,4 +8,7 @@
    <changeSet id="positionsTableUseBigIntId" author="mazen">
         <sqlFile encoding="utf8" path="classpath:database/tracking/creation/positionsTableUseBigIntId.sql"/>
    </changeSet>
+    <changeSet id="positionsTableAddHAT" author="marwan">
+        <sqlFile encoding="utf8" path="classpath:database/tracking/creation/positionsTableAddHeightAboveTerrain.sql"/>
+    </changeSet>
 </databaseChangeLog>

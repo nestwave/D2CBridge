@@ -39,6 +39,7 @@ import static java.lang.Math.sqrt;
 @Table(name = "positions")
 public class PositionRecord{
 	public static String positionDisplayColumns = "Longitude[°],Latitude[°],Altitude[m],Speed[m/s],Confidence[m],Date & Time";
+	public static String positionDisplayColumns19 = "Longitude[°],Latitude[°],Altitude[m],Speed[m/s],Confidence[m],Date & Time,Height Above Terrain[m]";
 	@EmbeddedId
 	CompositeKey key;
 
@@ -54,6 +55,8 @@ public class PositionRecord{
 	@NotNull
 	private float alt;
 
+	private Float hat;
+
 	@NotNull
 	@Column(name = "\"Vx\"")
 	private float Vx;
@@ -66,13 +69,14 @@ public class PositionRecord{
 	@Column(name = "\"Vz\"")
 	private float Vz;
 
-	public PositionRecord(long id, ZonedDateTime utcTime, float confidence, float lon, float lat, float alt, float Vx, float Vy, float Vz)
+	public PositionRecord(long id, ZonedDateTime utcTime, float confidence, float lon, float lat, float alt, Float hat, float Vx, float Vy, float Vz)
 	{
 		CompositeKey key = new CompositeKey(id, utcTime);
 		this.key = key;
 		this.lon = lon;
 		this.lat = lat;
 		this.alt = alt;
+		this.hat = hat;
 		this.Vx = Vx;
 		this.Vy = Vy;
 		this.Vz = Vz;

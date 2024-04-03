@@ -135,7 +135,7 @@ public class EndPoint{
 			response = new GnssServiceResponse(HttpStatus.EXPECTATION_FAILED, "Please supply a deviceId parameter.");
 		}else{
 			if(apiVer.compareTo("v1.8") > 0){
-				response = navigationService.retrievePositionsAndPlatofrmStatusFromDatabase(deviceId);
+				response = navigationService.retrievePositionsAndPlatofrmStatusFromDatabase(deviceId, apiVer);
 			}else{
 				response = navigationService.retrievePositionsFromDatabase(deviceId);
 			}

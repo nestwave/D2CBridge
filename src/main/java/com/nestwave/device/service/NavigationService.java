@@ -174,7 +174,7 @@ public class NavigationService extends GnssService{
 		return new GnssServiceResponse(HttpStatus.OK, csv.getBytes());
 	}
 
-	public GnssServiceResponse retrievePositionsAndPlatofrmStatusFromDatabase(long deviceId)
+	public GnssServiceResponse retrievePositionsAndPlatofrmStatusFromDatabase(long deviceId, String apiVer)
 	{
 		String csv;
 		List<PositionRecord> positionRecords = positionRepository.findAllPositionRecordsById(deviceId);
@@ -183,7 +183,7 @@ public class NavigationService extends GnssService{
 			return retrievePositionsFromDatabase(deviceId);
 		}
 		log.debug("Query all positions and status records for deviceId = {}", deviceId);
-		csv = thintrackPlatformStatusRepository.getAllRecordsWithId(deviceId, positionRecords);
+		csv = thintrackPlatformStatusRepository.getAllRecordsWithId(deviceId, positionRecords, apiVer);
 		return new GnssServiceResponse(HttpStatus.OK, csv.getBytes());
 	}
 
@@ -213,7 +213,7 @@ public class NavigationService extends GnssService{
 	public GnssServiceResponse savePositionIntoDatabase(long deviceId, GnssPositionResults navResults){
 		PositionRecord positionRecord = new PositionRecord(deviceId, navResults.utcTime,
 				navResults.confidence,
-				navResults.position[0], navResults.position[1], navResults.position[2],
+				navResults.position[0], navResults.position[1], navResults.position[2], navResults.HeightAboveTerrain,
 				navResults.velocity[0], navResults.velocity[1], navResults.velocity[2]);
 
 		positionRepository.insertNavigationRecord(positionRecord);

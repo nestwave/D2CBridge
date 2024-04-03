@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.nestwave.device.repository.position.PositionRecord.positionDisplayColumns;
+import static com.nestwave.device.repository.position.PositionRecord.positionDisplayColumns19;
 import static com.nestwave.device.repository.thintrack.ThinTrackPlatformBarometerStatusRecord.platformStatusDisplayColumns;
 import static java.lang.String.format;
 import static java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME;
@@ -75,21 +76,30 @@ public class ThinTrackPlatformStatusRepository{
 		thintrackPlatformStatusJpaRepository.deleteByKeyId(id);
 	}
 
-	public String getAllRecordsWithId(long id, List<PositionRecord> positionRecords){
+	public String getAllRecordsWithId(long id, List<PositionRecord> positionRecords, String apiVer){
 		StringBuilder csv = new StringBuilder();
 		List<ThinTrackPlatformStatusRecord> statusRecords = findAllRecordsById(id);
 		List<ThinTrackPlatformBarometerStatusRecord> baroRecords = findAllBaroRecordsById(id);
+		String columnNames;
 
-		if(statusRecords.isEmpty()){
-			csv.append(positionDisplayColumns + "\n");
+		if(apiVer.compareTo("v1.91") >= 0){
+		 	columnNames = positionDisplayColumns19;
+		} else {
+			columnNames = positionDisplayColumns;
+		}
+		if(!statusRecords.isEmpty()){
+			csv.append(columnNames+"," + platformStatusDisplayColumns + "\n");
 		}else{
-			csv.append(positionDisplayColumns + "," + platformStatusDisplayColumns + "\n");
+			csv.append(columnNames+"\n");
 		}
 		for(PositionRecord position : positionRecords){
 			csv.append(format("%f,%f,%f,%f,%f,%s", position.getLon(), position.getLat(), position.getAlt(),
 					position.getSpeed(), position.getConfidence(),
 					position.getKey().getUtcTime().format(ISO_ZONED_DATE_TIME)
 			));
+			if(apiVer.compareTo("v1.91") >= 0){
+				csv.append(format(",%f", position.getHat()));
+			}
 			for(ThinTrackPlatformStatusRecord statusRecord : statusRecords){
 				if(position.getKey().equals(statusRecord.getKey())){
 					csv.append(format(",%d,%d,%d,%d", statusRecord.ambientTemperature, statusRecord.batteryTemperature,
