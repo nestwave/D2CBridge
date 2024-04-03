@@ -224,6 +224,17 @@ The device identifier is the first bytes of the received data packet:
 - 32 bits for v1.6 and prior versions. This is a legacy format and shall not be
   used anymore.
 
+### Security Manager plugin
+D2CB service uses a Json Web Token to authenticate to NextNav Hybrid GNSS Cloud.
+It updates it regularly using `/renew` API.
+The newly retrieved JWT needs to be stored in a secure persistent storage.
+
+As every company has its own security rules, we provide a plugin interface to handle these operations.
+We provide also a plugin implementation example to show how this interface is used.
+
+Customers __shall reimplement themselves__ in order to fit their own security standards.
+It is highly recommended not to use file system operations, like it is used in the example plugin implementation, unless the customer __fully understands the security problems__ that can result from it and __takes the relevant actions to counter them__.
+
 ### Adding a plugin
 An example of plugins exists in [`src/main/java/com/traxmate`](src/main/java/com/traxmate).
 
