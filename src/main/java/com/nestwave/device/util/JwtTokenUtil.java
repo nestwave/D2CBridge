@@ -18,12 +18,11 @@
  *****************************************************************************/
 package com.nestwave.device.util;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.nio.file.Path;
 import java.util.Date;
 import java.util.function.Function;
 
+import com.nestwave.service.SecretManager;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,42 +32,35 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
-import static java.nio.file.Files.readAllBytes;
-import static java.nio.file.Files.write;
-
 @Component
 @Data
 @Slf4j
 public class JwtTokenUtil implements Serializable {
-	public final Path path;
 	public final int period;
 
-    public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+	private SecretManager secretManager;
 
-    private String secret;
-
-	public JwtTokenUtil(@Value("${jwt.file}") String file, @Value("${jwt.period}") int period){
-		path = Path.of(file);
+	public JwtTokenUtil(@Value("${jwt.period}") int period){
 		this.period = period;
-        jwtUpdate();
-	}
-
-    public void jwtUpdate(){
-        try{
-            secret = "Bearer " + new String(readAllBytes(path));
-        }catch(IOException e){
-            log.error("Could not open {} for reading token.", path);
-        }
     }
 
     public void jwtUpdate(String secret){
-        try{
-            write(path, secret.getBytes());
-            jwtUpdate();
-        }catch(IOException e){
-            log.error("Could not open {} for writing token.", path);
-        }
+		if(secretManager == null){
+			log.error("Call to secret manager service before loading related plugin.");
+			return;
+		}
+		if(secretManager.setSecret("D2CB_JWT", secret)){
+			log.error("Could not store JWT in secret manger.");
+		}
     }
+
+	public String getSecret(){
+		if(secretManager == null){
+			log.error("Call to secret manager service before loading related plugin.");
+			return null;
+		}
+		return secretManager.getSecret("D2CB_JWT");
+	}
 
     //retrieve username from jwt token
     public String getUsernameFromToken(String token) {
@@ -86,6 +78,8 @@ public class JwtTokenUtil implements Serializable {
     }
     //for retrieveing any information from token we will need the secret key
     private Claims getAllClaimsFromToken(String token) {
+		String secret = getSecret();
+
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
     }
 
@@ -95,6 +89,15 @@ public class JwtTokenUtil implements Serializable {
         return expiration.before(new Date());
     }
 
+	public void register(SecretManager secretManager){
+		if(secretManager != null){
+			log.warn("Loading new secret manager instance {} overrides a previously loaded one {}.",
+				secretManager.getClass().getName(),
+				this.secretManager.getClass().getName()
+			);
+		}
+		this.secretManager = secretManager;
+	}
 
     //validate token
     public Boolean validateToken(String token, UserDetails userDetails) {

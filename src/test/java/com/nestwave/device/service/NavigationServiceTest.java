@@ -74,7 +74,7 @@ class NavigationServiceTest {
 
   @BeforeEach
   public void init() {
-    navigationService = new NavigationService(new JwtTokenUtil(file, period),
+    navigationService = new NavigationService(new JwtTokenUtil(period),
 		                                      navigationRepository,
 		                                      thinTrackPlatformStatusRepository,
                                               navigationUrl, null, restTemplate);

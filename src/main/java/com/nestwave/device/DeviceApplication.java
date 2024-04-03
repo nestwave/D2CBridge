@@ -118,10 +118,10 @@ class JwtUpdateSchedulerService implements  Runnable{
 		String secret = jwtRenew(jwtTokenUtil.getSecret());
 
 		if(secret != null){
-			log.info("Updating JWT in file {}", jwtTokenUtil.path);
+			log.info("Updating JWT from NextNavCloud was successful. Saving it into secret manager plugin.");
 			jwtTokenUtil.jwtUpdate(secret);
 		}else{
-			log.error("Failed to update JWT");
+			log.error("Failed to update JWT from NextNav Cloud.");
 		}
 	}
 
@@ -139,7 +139,7 @@ class JwtUpdateSchedulerService implements  Runnable{
 				JwtResponse jwtResponse = responseEntity.getBody();
 				return jwtResponse.token;
 			case UNAUTHORIZED:
-				log.error("Current JWT seems to be expired. Please consider restarting this service after manually updating {}.", jwtTokenUtil.path);
+				log.error("Current JWT seems to be expired. Please consider restarting this service after manually updating it.");
 			default:
 				log.error("Failed to update JWT. Remote server returned: {}", requestEntity.getBody());
 				return null;
