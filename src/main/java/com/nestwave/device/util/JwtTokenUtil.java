@@ -90,7 +90,7 @@ public class JwtTokenUtil implements Serializable {
     }
 
 	public void register(SecretManager secretManager){
-		if(secretManager != null){
+		if(this.secretManager != null){
 			log.warn("Loading new secret manager instance {} overrides a previously loaded one {}.",
 				secretManager.getClass().getName(),
 				this.secretManager.getClass().getName()

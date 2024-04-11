@@ -71,7 +71,7 @@ public abstract class GnssService {
     public <T> ResponseEntity<T> remoteApi(String apiVer, String api, GnssServiceParameters payload, String clientIpAddr, Class<T> responseType){
 		ResponseEntity<T> responseEntity;
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", jwtTokenUtil.getSecret());
+        headers.set("Authorization", "Bearer " + jwtTokenUtil.getSecret());
         HttpEntity<?> requestEntity = new HttpEntity<>(payload, headers);
         String uri;
         String strResponse;
