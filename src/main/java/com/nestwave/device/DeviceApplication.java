@@ -127,7 +127,7 @@ class JwtUpdateSchedulerService implements  Runnable{
 
 	String jwtRenew(String secret){
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", secret);
+		headers.set("Authorization", "Bearer " + secret);
 		HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
 		String uri = builder.toUriString();
